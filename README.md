@@ -6,7 +6,7 @@ This is a course project,we need to demonstrate a simplex transmission of data (
 ## 2 System Design 
 
 ### 2.1 Transmitter
-![transmitter](transmitter.drawio.png)
+![transmitter](transmitter_64QAM.drawio.png)
 
 ### 2.2 Receiver
 ![transmitter](Receiver.drawio.png)
