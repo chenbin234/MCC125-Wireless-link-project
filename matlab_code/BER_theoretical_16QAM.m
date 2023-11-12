@@ -1,5 +1,5 @@
 % Parameters
-M = 16;          % 16-QAM modulation
+M = 64;          % 16-QAM modulation
 m = log2(M);
 EbN0dB = 0:0.01:20; % Eb/N0 values in dB
 EbN0 = 10.^(EbN0dB/10); % Convert Eb/N0 from dB to linear scale

@@ -10,11 +10,11 @@ Interp_Factor=64;
 Decimation_Factor=Interp_Factor;
 %% Sampling rate and time
 fs=MasterClock_Rate/Interp_Factor;%sampling rate
-dt=1/fs;
+dt=1/fs;%Sampling time
 N=10000;%Numbr of samples in a frame
 frame_time=N/fs;% Time for 1 frame
 time=(0:dt:dt*(N-1))';
-s_tx=(0.2*exp(1i*2*pi*100000*time));
+% s_tx=(0.2*exp(1i*2*pi*100000*time));
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
