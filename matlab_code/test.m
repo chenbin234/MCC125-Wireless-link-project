@@ -1,9 +1,3 @@
-% Your string
-myString = 'Hello, Bingcheng!';
-
-% Convert each character to its ASCII value
-binaryRepresentation = str2bits(myString);
-
-disp(binaryRepresentation);
-
-str = (char(bin2dec(reshape(char(binaryRepresentation+'0'), 8,[]).')))'
+L = 16;
+x = (0:L-1);
+y = qammod(x,L,PlotConstellation=true);

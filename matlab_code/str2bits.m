@@ -3,7 +3,7 @@ function message_bits = str2bits(message_string)
 %This function converts a string message to binary bits.
 
 % Convert each character in the string to its ASCII code
-asciiCodes = double(message_string);
+asciiCodes = double(char(message_string));
 
 % Convert ASCII codes to binary code 
 binaryCodes = dec2bin(asciiCodes, 8); % 8 is the number of bits for each character
