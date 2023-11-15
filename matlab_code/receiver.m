@@ -22,24 +22,7 @@ RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
 
-%% call the Tx_64QAM function
-message_string = "Hello, Bingcheng!";
-message_bits = str2bits(message_string);
-
-fc = 2.4e9; %carrier frequency
-s_tx = Tx_64QAM(message_bits,fc);
-
-%% Setup the Tx
-tx = comm.SDRuTransmitter(... 
-'Platform','N200/N210/USRP2',...
-'IPAddress','192.168.10.6',...
-'CenterFrequency',0,...
-'EnableBurstMode',1,...
-'NumFramesInBurst',1,...
-'InterpolationFactor',Interp_Factor,...
-'MasterClockRate',MasterClock_Rate,...
-'TransportDataType','int16');
-  
+%% Setup the Rx
 rx = comm.SDRuReceiver(...
     'Platform','N200/N210/USRP2',...
     'IPAddress','192.168.10.5',...
@@ -50,19 +33,49 @@ rx = comm.SDRuReceiver(...
     'SamplesPerFrame',N,...
     'MasterClockRate',MasterClock_Rate,...
     'TransportDataType','int16');
-    currentTime = 0;
-    for k=1:200 % a loop 
-      tx(s_tx)
-      %% Start the Rx
-      [rx_data] = step(rx);
-      rx_data=double(rx_data)/(2^16);
-      [rx_dsb,f]=periodogram(rx_data,hamming(length(rx_data)),NFFT,fs,'centered');
-      rx_dsb=10*log10(RBW*rx_dsb)+15;% In dBm
-      figure(1);subplot(2,1,1);plot(time,real(rx_data),'r',time,imag(rx_data),'b');%ylim([-1 1]);grid;ylabel('V');hold on;
-      figure(1);subplot(2,1,2);plot(f, rx_dsb);ylim([-120 10]);grid;ylabel('dBm');
-     
-      currentTime=currentTime+frame_time
-  end
- release(rx);
- release(tx);
-    
+
+currentTime = 0;
+for k=1:200 % a loop 
+  %% Start the Rx
+  [rx_data] = step(rx);
+  rx_data=double(rx_data)/(2^16);
+
+  [rx_dsb,f]=periodogram(rx_data,hamming(length(rx_data)),NFFT,fs,'centered');
+  rx_dsb=10*log10(RBW*rx_dsb)+15;% In dBm
+  figure(1);subplot(2,1,1);plot(time,real(rx_data),'r',time,imag(rx_data),'b');%ylim([-1 1]);grid;ylabel('V');hold on;
+  figure(1);subplot(2,1,2);plot(f, rx_dsb);ylim([-120 10]);grid;ylabel('dBm');
+ 
+  currentTime=currentTime+frame_time
+end
+release(rx);
+
+%% process the received signal
+[received_message_bits, received_message_symbols]= Rx_64QAM(rx);
+
+% Plot the constellation diagram of received symbols
+figure(1);
+scatterplot(received_message_symbols);
+title('Received Symbols Constellation Diagram');
+
+% convert the received_message_bits to strings
+received_message_string = bits2str(received_message_bits);
+
+
+%% calculate the BER
+
+% True transmitting message
+message_string = "Hello, Bingcheng, Gray code, named after the American physicist and mathematician Frank Gray, " + ...
+    "is a binary numeral system where two successive values differ in only one bit. " + ...
+    "In Gray code, also known as reflected binary code or unit distance code, " + ...
+    "each decimal digit is represented by a binary code, and adjacent codes differ in only one bit.";
+message_bits = str2bits(message_string);
+
+% Calculate the number of bit errors
+nErrors = biterr(message_bits,received_message_bits);
+
+% Display the result
+disp(['The message transmitted :  ', message_string])
+disp(['The message received    :  ', received_message_string])
+disp(['Number of bit errors    :  ', num2str(nErrors)])
+
+
