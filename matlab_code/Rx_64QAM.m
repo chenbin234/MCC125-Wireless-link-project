@@ -19,7 +19,7 @@ tau = 1/fsymb;        % Nyquist period or symbol time
 span = 6;             % Pulse width (symbol times of pulse)
 
 preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
-
+preamble = repmat(preamble,1,4);
 %% 1. Coarse frequency correction
 [pxx, f] = pwelch(received_signal.',[],[],[],fs,'centered','power');
 index = find(pxx == max(pxx));
@@ -28,7 +28,7 @@ freq_shift_coarse = f(index);
 % first frequency correction
 rx_freq_correction = received_signal.*exp(2*-1i*pi*(freq_shift_coarse)*(0:length(received_signal)-1)*1/fs); 
 
-figure(1);
+figure(2);
 subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
 title('Power spetrum of received signal (raw)'); 
 subplot(2,1,2), pwelch(rx_freq_correction,[],[],[],fs,'centered','power');
@@ -49,6 +49,15 @@ Threshold = 0.8;                                      % if corr has a peak over 
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 
 if (tmp > Threshold)
+
+    [rx_data] = step(rx_freq_correction);
+    rx_data=double(rx_data)/(2^16);
+
+    [rx_dsb,f]=periodogram(rx_data,hamming(length(rx_data)),NFFT,fs,'centered');
+    rx_dsb=10*log10(RBW*rx_dsb)+15;% In dBm
+    figure(1);subplot(2,1,1);plot(time,real(rx_data),'r',time,imag(rx_data),'b');%ylim([-1 1]);grid;ylabel('V');hold on;
+    figure(1);subplot(2,1,2);plot(f, rx_dsb);ylim([-120 10]);grid;ylabel('dBm');
+
     disp('find the preamble!')
     Tx_hat = Tmax - length(conv_preamble_pulse);      % find delay, Tx_hat is the location of the start(preamble) of the message
     display(['The Tmax is ',num2str(Tmax)])

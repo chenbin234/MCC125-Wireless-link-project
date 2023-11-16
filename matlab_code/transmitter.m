@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=64;
+Interp_Factor=10;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -23,10 +23,8 @@ NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
 
 %% call the Tx_64QAM function
-message_string = "Hello, Bingcheng, Gray code, named after the American physicist and mathematician Frank Gray, " + ...
-    "is a binary numeral system where two successive values differ in only one bit. " + ...
-    "In Gray code, also known as reflected binary code or unit distance code, " + ...
-    "each decimal digit is represented by a binary code, and adjacent codes differ in only one bit.";
+message_lines = readlines("message.txt");
+message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
 
 fc = 2.4e9; %carrier frequency
@@ -35,8 +33,8 @@ s_tx = Tx_64QAM(message_bits);
 %% Setup the Tx
 tx = comm.SDRuTransmitter(... 
 'Platform','N200/N210/USRP2',...
-'IPAddress','192.168.10.6',...
-'CenterFrequency',0,...
+'IPAddress','192.168.10.5',...
+'CenterFrequency',10e6,...
 'EnableBurstMode',1,...
 'NumFramesInBurst',1,...
 'InterpolationFactor',Interp_Factor,...
@@ -44,8 +42,8 @@ tx = comm.SDRuTransmitter(...
 'TransportDataType','int16');
   
 currentTime = 0;
-for k=1:2 % a loop 
-  tx(s_tx)
+for k=1:200 % a loop 
+  tx(s_tx')
   currentTime=currentTime+frame_time
 end
 release(tx);

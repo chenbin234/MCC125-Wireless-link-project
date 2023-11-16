@@ -25,16 +25,23 @@ m = buffer(message_bits, bpsymb)';            % Group bits into bits per symbol
 m_idx = bi2de(m, 'left-msb')'+1;              % Bits to symbol index
 x = qammod(m_idx, M, UnitAveragePower=true);  % Look up symbols using the indices
 
+% figure(1);
+% plot(real(x), imag(x), 'o');  % Plot real vs. imaginary parts
+% title('Constellation Diagram');
+% xlabel('Real Part');
+% ylabel('Imaginary Part');
+% grid on;
+
 % Add preamble: -––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 preamb = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
+preamb = repmat(preamb,1,4);
 x = [preamb, x]; 
 
 x_upsample = upsample(x, fsfd);               % Space the symbols fsfd apart, to enable pulse shaping using conv.
 
 % Pulse shaping - Convert symbols to baseband signal: -––––––––––––––––––––
 [pulse,~] = rtrcpuls(alpha,tau,fs,span);      % Create rrc pulse: rtrcpuls(alpha,tau,fs,span)
-tx_signal = conv(pulse,x_upsample);                   % Create baseband signal (convolve symbol with pulse)
-
+tx_signal = conv(pulse,x_upsample);           % Create baseband signal (convolve symbol with pulse)
 
 % Add carrier - Convert into passband signal: -––––––––––––––––––––––––––––
 % tx_signal = s.*exp(-1i*2*pi*fc*(0:length(s)-1)*Tsamp); % Put the baseband signal on a carrier signal
