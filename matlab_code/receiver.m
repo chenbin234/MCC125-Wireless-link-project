@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=10;
+Interp_Factor=6;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -18,6 +18,7 @@ N=10000;%Numbr of samples in a frame
 frame_time=N/fs;% Time for 1 frame
 time=(0:dt:dt*(N-1))';
 % s_tx=(0.2*exp(1i*2*pi*100000*time));
+% resolution bandwidth
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
@@ -37,13 +38,13 @@ rx = comm.SDRuReceiver(...
 currentTime = 0;
 for k=1:200 % a loop 
   %% Start the Rx
-  [rx_data] = step(rx);
+  [rx_data] = rx();
   rx_data=double(rx_data)/(2^16);
 
-  [rx_dsb,f]=periodogram(rx_data,hamming(length(rx_data)),NFFT,fs,'centered');
-  rx_dsb=10*log10(RBW*rx_dsb)+15;% In dBm
-  figure(1);subplot(2,1,1);plot(time,real(rx_data),'r',time,imag(rx_data),'b');%ylim([-1 1]);grid;ylabel('V');hold on;
-  figure(1);subplot(2,1,2);plot(f, rx_dsb);ylim([-120 10]);grid;ylabel('dBm');
+%   [rx_dsb,f]=periodogram(rx_data,hamming(length(rx_data)),NFFT,fs,'centered');
+%   rx_dsb=10*log10(RBW*rx_dsb)+15;% In dBm
+%   figure(1);subplot(2,1,1);plot(time,real(rx_data),'r',time,imag(rx_data),'b');%ylim([-1 1]);grid;ylabel('V');hold on;
+%   figure(1);subplot(2,1,2);plot(f, rx_dsb);ylim([-120 10]);grid;ylabel('dBm');
  
   currentTime=currentTime+frame_time
 end
