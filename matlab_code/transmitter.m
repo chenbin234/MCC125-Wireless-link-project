@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=10;
+Interp_Factor=6;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -27,7 +27,6 @@ message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
 
-fc = 2.4e9; %carrier frequency
 s_tx = Tx_64QAM(message_bits);
 
 %% Setup the Tx
@@ -43,8 +42,9 @@ tx = comm.SDRuTransmitter(...
   
 currentTime = 0;
 for k=1:200 % a loop 
-  tx(s_tx')
+  tx(s_tx') % transmitting the signal s_tx
   currentTime=currentTime+frame_time
 end
+% After the loop,release system resources associated with the transmitter object.
 release(tx);
     

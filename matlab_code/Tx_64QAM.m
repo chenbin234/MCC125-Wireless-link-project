@@ -5,10 +5,10 @@ function tx_signal = Tx_64QAM(message_bits)
 
 % Input parameters -–––––––––––––––––––––––––––––––––––––––––––––––––––––––
 Rb = 10*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
-N = length(message_bits);% Number of bits to transmit
 fc = 2.4*1e9;            % Carrier frequency [Hz]
 
 M = 64;               % Number of symbols in the constellation
+
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
@@ -19,25 +19,53 @@ fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 alpha = 0.8;          % Roll off factor / Excess bandwidth factor (a_RC=0.35;a_RRC=0.8)
 tau = 1/fsymb;        % Nyquist period or symbol time 
 span = 6;             % Pulse width (symbol times of pulse)
+segment_size = 3000;  % Number of bits in each message segmentation
+
+
+% Calculate the number of segments needed
+num_segments = ceil(length(message_bits) / segment_size);
+
 
 % Bit to symbol mapping & spacing: -–––––––––––––––––––––––––––––––––––––––
 m = buffer(message_bits, bpsymb)';            % Group bits into bits per symbol
-m_idx = bi2de(m, 'left-msb')'+1;              % Bits to symbol index
+m_idx = bi2de(m, 'left-msb')';              % Bits to symbol index
 x = qammod(m_idx, M, UnitAveragePower=true);  % Look up symbols using the indices
+% x = qammod(m_idx, M);  % Look up symbols using the indices
 
-% figure(1);
-% plot(real(x), imag(x), 'o');  % Plot real vs. imaginary parts
-% title('Constellation Diagram');
-% xlabel('Real Part');
-% ylabel('Imaginary Part');
-% grid on;
 
 % Add preamble: -––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-preamb = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
-preamb = repmat(preamb,1,4);
-x = [preamb, x]; 
+preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
+preamble = repmat(preamble,1,4);
+% pilot = zeros(1,100);
+% x = [pilot, preamb, x]; 
+% x = [preamb, x]; 
 
-x_upsample = upsample(x, fsfd);               % Space the symbols fsfd apart, to enable pulse shaping using conv.
+% Initialize the output vector
+message_symbol = [];
+
+% Loop through segments
+for i = 1:num_segments
+    % Extract the current segment
+    start_index = (i - 1) * (segment_size./bpsymb) + 1;
+    end_index = min(i * (segment_size./bpsymb), length(x));
+    current_symbol_segment = x(start_index:end_index);
+    
+    % If the total number of bits is not exactly divisible by segment_size(3000), add zeros at the end
+    if mod(length(current_symbol_segment), (segment_size./bpsymb)) ~= 0
+        num_zeros_to_add = (segment_size./bpsymb) - mod(length(current_symbol_segment), (segment_size./bpsymb));
+        current_symbol_segment = [current_symbol_segment, zeros(1, num_zeros_to_add)];
+    end
+
+    % Add preamble before the segment
+    symbol_segment_with_preamble = [preamble, current_symbol_segment];
+
+    % Append the current segment to the output vector
+    message_symbol = [message_symbol, symbol_segment_with_preamble];
+end
+
+
+
+x_upsample = upsample(message_symbol, fsfd);               % Space the symbols fsfd apart, to enable pulse shaping using conv.
 
 % Pulse shaping - Convert symbols to baseband signal: -––––––––––––––––––––
 [pulse,~] = rtrcpuls(alpha,tau,fs,span);      % Create rrc pulse: rtrcpuls(alpha,tau,fs,span)
