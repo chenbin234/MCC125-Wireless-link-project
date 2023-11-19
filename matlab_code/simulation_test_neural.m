@@ -15,7 +15,6 @@ fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 alpha = 0.8;          % Roll off factor / Excess bandwidth factor (a_RC=0.35;a_RRC=0.8)
 tau = 1/fsymb;        % Nyquist period or symbol time 
 span = 6;             % Pulse width (symbol times of pulse)
-segment_size = 3000;  % Number of bits in each message segmentation
 
 % message to be send
 % message_string = 'Heooo sname!';
@@ -26,7 +25,7 @@ message_string = strjoin(message_lines, ' '); % Combine the lines into a single 
 message_bits = str2bits(message_string);
 message_bits = message_bits(1:3000);
 % transmitter
-s_tx = Tx_64QAM(message_bits, segment_size);
+s_tx = Tx_64QAM(message_bits);
 
 
 figure(1);

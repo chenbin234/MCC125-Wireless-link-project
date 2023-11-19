@@ -1,4 +1,4 @@
-function tx_signal = Tx_64QAM(message_bits)
+function tx_signal = Tx_64QAM(message_bits, segment_size)
 % This function is to send message in 64QAM.
 % message_bits = message to be transmitted.
 % fc = carrier frequency
@@ -19,7 +19,7 @@ fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 alpha = 0.8;          % Roll off factor / Excess bandwidth factor (a_RC=0.35;a_RRC=0.8)
 tau = 1/fsymb;        % Nyquist period or symbol time 
 span = 6;             % Pulse width (symbol times of pulse)
-segment_size = 3000;  % Number of bits in each message segmentation
+% segment_size = 3000;  % Number of bits in each message segmentation
 
 
 % Calculate the number of segments needed
