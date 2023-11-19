@@ -26,7 +26,7 @@ received_signal = received_signal./max(abs(received_signal));  % normalise recei
 % received_signal=filtfilt(a,b,received_signal);
 
 preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
-preamble = repmat(preamble,1,4);
+preamble = repmat(preamble,1,10);
 %% 1. Coarse frequency correction
 dc_offset_value = 1;
 received_signal_with_dc_offset = received_signal + dc_offset_value;
@@ -38,11 +38,11 @@ freq_shift_coarse = f(index);
 % first coarse frequency correction
 rx_freq_correction = received_signal.*exp(2*-1i*pi*(freq_shift_coarse)*(0:length(received_signal)-1)*1/fs); 
 
-figure(2);
-subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
-title('Power spetrum of received signal (raw)'); 
-subplot(2,1,2), pwelch(rx_freq_correction,[],[],[],fs,'centered','power');
-title('Power spetrum of received signal (after coarse frequency correction)');
+% figure(2);
+% subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
+% title('Power spetrum of received signal (raw)'); 
+% subplot(2,1,2), pwelch(rx_freq_correction,[],[],[],fs,'centered','power');
+% title('Power spetrum of received signal (after coarse frequency correction)');
 
 % figure(4);
 % plot(pxx);
@@ -51,6 +51,7 @@ title('Power spetrum of received signal (after coarse frequency correction)');
 
 preamble_upsample = upsample(preamble, fsfd);         % upsample preamble  
 conv_preamble_pulse = conv(pulse, preamble_upsample); % pulse shaping the upsampled preamble
+% conv_preamble_pulse = rescale(conv_preamble_pulse, -1, 1);  % normalise conv_preamble_pulse
 
 corr = conv(rx_freq_correction,fliplr(conv_preamble_pulse));% correlate the recorded signal(maybe have the message) with processed preamble
 % corr = xcorr(conv_preamble_pulse,rx_freq_correction);
@@ -58,7 +59,7 @@ corr = conv(rx_freq_correction,fliplr(conv_preamble_pulse));% correlate the reco
 disp('correlate the recorded signal with conv_preamble_pulse')
 
 corr = corr./length(preamble);                                      % normalize corr 
-figure(3); clf;plot(abs(corr));
+figure(3);plot(abs(corr));
 
 
 Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
@@ -88,7 +89,7 @@ if (tmp > Threshold)
     %MF_output = filter(MF, 1, y);
 
     % MF_output = MF_output/max(abs(MF_output));            % normalize
-    disp('The signal is filtered')
+    disp('Matched Filtering done!')
 
 %% 4. Down Sampling
     MF_output_cut = MF_output(2*span*fsfd-1:end-2*span*fsfd+1);  % cut the beginning and end of match filter output
@@ -96,63 +97,54 @@ if (tmp > Threshold)
     rx_preamble_message = MF_output_cut(1:fsfd:end);      % dowmsampling, get the preamble+message                 
     rx_vec = rx_preamble_message(1+length(preamble):end); % get the message
       
-%      MF_output_downsample = downsample(MF_output(:), fsfd);
-%      rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
+    %MF_output_downsample = downsample(MF_output(:), fsfd);
+    %rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
     
 %% 5. Frequency and phase correction
 
-%     % Phase synchronization & Frequency synchronization
-%     rx_preamble = rx_preamble_message(1:length(preamble));% extract the recieved preamble symbols
-%     rx_preamble = rx_preamble./mean(abs(rx_preamble));    % normalize the preamle symbols 
-%        
-%     phase = (angle(rx_preamble) - angle(preamble)); % calculated the difference in angle between known preamble and received preamble  
-%     disp('Phase offset before mod:')   
-%     disp(phase)
-%     phase = mod(phase, 2*pi); % Get offset  
-%     
-%     % angle(rx_preamble) - angle(preamble) = phase_offset + 2*pi*frequency_offset 
-%     % polyfit(x,phase), the intercept is phase offset, the slope is 2*pi*frequency_offset
-%     % we can got the phase offset and frequency_offset
-%     x = Tsamp*[1:1:length(preamble)];
-%     P = polyfit(x,phase,1);
-%     slope = P(1);
-%     fdelta = slope./(2*pi);
-%     intercept = P(2);
-%     disp(['intercept is:',num2str(intercept* 180/pi)])
-%     disp(['fdelta:',num2str(fdelta)])
-%     disp('Phase offset after mod:')
-%     disp(phase)
-%     
-%     % another way to get phase offset
-%     avg_phase = mean(phase); 
-%     disp(['The signal is Phase Shifted with ', num2str(avg_phase * 180/pi), ' degrees'])
-% 
-%     %rx_vec = rx_vec * exp(-1j*avg_phase); % phase syncronization
-%     rx_vec = rx_vec * exp(-1j*intercept); % phase syncronization
-%     disp(['The length of rx_vec is', num2str(length(rx_vec))])
-%     
-%     % Frequency synchronization
-%     for i =1:1:length(rx_vec)
-%         rx_vec(i) = rx_vec(i) * exp(-1j*2*pi*fdelta*Tsamp);
-%     end
-% 
-%     % MF_output_cut_without_premable = MF_output_cut_without_premable * exp(-1j*avg_phase); % Match_filter with time sync and phase sync
-%     rx_vec = rx_vec./abs(rx_vec); % normalise re_vec
-%     
-%     disp('Symbols acquired!')
-%     rx_vec = rx_vec./max(abs(rx_vec)); % normalise re_vec
-    rx_vec = zscore(rx_vec);
+    % Phase synchronization & Frequency synchronization
+    rx_preamble = rx_preamble_message(1:length(preamble));% extract the recieved preamble symbols
+    rx_preamble = rx_preamble./max(abs(rx_preamble));    % normalize the preamle symbols 
+        
+    phase_slope = unwrap(angle(rx_preamble) - angle(preamble)); % calculated the difference in angle between known preamble and received preamble  
 
-    received_message_symbols = rx_vec;
-    received_message_bits = qamdemod(rx_vec,M,'OutputType','bit',UnitAveragePower=true);
-%     received_message_bits = qamdemod(rx_vec,M,'OutputType','bit');
+    % unwrap(angle(rx_preamble) - angle(preamble)) = phase_offset + 2*pi*frequency_offset 
+    % polyfit(x,phase), the intercept is phase offset, the slope is 2*pi*frequency_offset
+    % we can got the phase offset and frequency_offset
+    
+    time_symb_synk = Tsymb*[1:1:length(preamble)];
+
+    p = polyfit(time_symb_synk,phase_slope,1);
+    phase_slope_fit = polyval(p,time_symb_synk);
+
+    freq_offset_estimated=p(1)/(2*pi);% In Hz
+    phase_offset_estimated_deg=360*(p(2))/(2*pi);
+    
+    disp(['Frequency offset estimated: ',num2str(freq_offset_estimated), 'Hz'])
+    disp(['Phase offset estimated: ',num2str(phase_offset_estimated_deg), 'degree'])
+
+
+    % Frequency correction after down-sampling
+    rx_vec=rx_vec(1:length(rx_vec)).*(exp(-1i*2*freq_offset_estimated*pi*Tsymb));% Correcting freq offset
+    disp('Frequency correction done!')
+
+    % Phase correction after down-sampling
+    rx_vec_correction=rx_vec*exp(-1i*p(2));% subtracting phase offset
+    disp('Phase correction done!')
+    
+    rx_vec_correction = zscore(rx_vec_correction);
+
+    received_message_symbols = rx_vec_correction;
+
+    received_message_symbols = received_message_symbols./max(abs(received_message_symbols));
+
+    received_message_bits = qamdemod(rx_vec_correction,M,'OutputType','bit',UnitAveragePower=true);
     received_message_bits = received_message_bits(:)';
-
-
-    % Plot constellation diagram
+    
+    % Plot constellation diagram after Frequency and phase correction
     figure(5);
     scatterplot(received_message_symbols);
-    title('QAM Constellation Diagram');
+    title('QAM Constellation Diagram after Frequency and phase correction');
 
 end
 end

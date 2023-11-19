@@ -35,7 +35,7 @@ x = qammod(m_idx, M, UnitAveragePower=true);  % Look up symbols using the indice
 
 % Add preamble: -––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
-preamble = repmat(preamble,1,4);
+preamble = repmat(preamble,1,10);
 % pilot = zeros(1,100);
 % x = [pilot, preamb, x]; 
 % x = [preamb, x]; 

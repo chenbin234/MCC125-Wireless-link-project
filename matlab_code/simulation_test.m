@@ -18,28 +18,48 @@ span = 6;             % Pulse width (symbol times of pulse)
 
 % message to be send
 % message_string = 'Heooo sname!';
-% message_string = 'Hello Bingc!';
+% message_string = 'Hello World!';
 
 message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
-
+message_bits = message_bits(1:3000);
 % transmitter
 s_tx = Tx_64QAM(message_bits);
 
 
-% figure(1);
-% subplot(2,1,1), pwelch(s_tx,[],[],[],fs,'centered','power');
-% title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
+figure(1);
+subplot(2,1,1), pwelch(s_tx,[],[],[],fs,'centered','power');
+title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
 % 
 %channel
 rxSig = awgn(s_tx,50,'measured');
-% 
-% subplot(2,1,2), pwelch(rxSig,[],[],[],fs,'centered','power');
-% title('Power spetrum of Transmitted Signal after Noise'); 
+
+% add Frequency offset
+t = (0:length(rxSig)-1)/fs;  % Time vector
+frequency_offset = 2;  % Adjust as needed
+s_tx_frequency_offset = rxSig.* exp(1i * 2 * pi * frequency_offset * t);
+
+% add Phase offset
+phase_offset = -pi/8;  % Adjust as needed
+s_tx_phase_offset = s_tx_frequency_offset * exp(1i * phase_offset);
+ 
+subplot(2,1,2), pwelch(s_tx_frequency_offset,[],[],[],fs,'centered','power');
+title('Power spetrum of Transmitted Signal after Noise'); 
 
 % receiver
 
-[received_message_bits, received_message_symbols]= Rx_64QAM(rxSig);
+[received_message_bits, received_message_symbols]= Rx_64QAM(s_tx_phase_offset);
+% received_message_bits = received_message_bits(1:96);
 % convert the received_message_bits to strings
 received_message_string = bits2str(received_message_bits(:))
+
+
+% Calculate the number of bit errors
+% nErrors = biterr(message_bits,received_message_bits);
+% 
+% % Display the result
+% % disp(['The message transmitted :  ', message_string])
+% % disp(['The message received    :  ', received_message_string])
+% disp(['Number of bit errors    :  ', num2str(nErrors)])
+% disp(['BER    :  ', num2str(nErrors/length(message_bits))])
