@@ -34,11 +34,11 @@ subplot(2,1,1), pwelch(s_tx,[],[],[],fs,'centered','power');
 title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
 % 
 %channel
-rxSig = awgn(s_tx,50,'measured');
+rxSig = awgn(s_tx,20,'measured');
 
 % add Frequency offset
 t = (0:length(rxSig)-1)/fs;  % Time vector
-frequency_offset = 2;  % Adjust as needed
+frequency_offset = 200;  % Adjust as needed
 s_tx_frequency_offset = rxSig.* exp(1i * 2 * pi * frequency_offset * t);
 
 % add Phase offset
@@ -50,17 +50,17 @@ title('Power spetrum of Transmitted Signal after Noise');
 
 % receiver
 
-[received_message_bits, received_message_symbols]= Rx_64QAM(s_tx_phase_offset);
+[received_message_bits, received_message_symbols, ~]= Rx_64QAM(s_tx_phase_offset, segment_size);
 % received_message_bits = received_message_bits(1:96);
 % convert the received_message_bits to strings
 received_message_string = bits2str(received_message_bits(:))
 
 
 % Calculate the number of bit errors
-% nErrors = biterr(message_bits,received_message_bits);
+nErrors = biterr(message_bits,received_message_bits);
 % 
-% % Display the result
-% % disp(['The message transmitted :  ', message_string])
-% % disp(['The message received    :  ', received_message_string])
-% disp(['Number of bit errors    :  ', num2str(nErrors)])
-% disp(['BER    :  ', num2str(nErrors/length(message_bits))])
+% Display the result
+% disp(['The message transmitted :  ', message_string])
+% disp(['The message received    :  ', received_message_string])
+disp(['Number of bit errors    :  ', num2str(nErrors)])
+disp(['BER    :  ', num2str(nErrors/length(message_bits))])

@@ -1,4 +1,4 @@
-function [received_message_bits, received_message_symbols]= Rx_64QAM(received_signal)
+function [received_message_bits, received_message_symbols, raw_message_symbol]= Rx_64QAM(received_signal, segment_size)
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
@@ -16,7 +16,7 @@ fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 alpha = 0.8;          % Roll off factor / Excess bandwidth factor (a_RC=0.35;a_RRC=0.8)
 tau = 1/fsymb;        % Nyquist period or symbol time 
 span = 6;             % Pulse width (symbol times of pulse)
-segment_size = 3000;  % Number of bits in each message segmentation
+% segment_size = 3000;  % Number of bits in each message segmentation
 
 
 received_signal = received_signal./max(abs(received_signal));  % normalise received_signal
@@ -99,7 +99,7 @@ if (tmp > Threshold)
       
     %MF_output_downsample = downsample(MF_output(:), fsfd);
     %rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
-    
+    raw_message_symbol = rx_vec;
 %% 5. Frequency and phase correction
 
     % Phase synchronization & Frequency synchronization

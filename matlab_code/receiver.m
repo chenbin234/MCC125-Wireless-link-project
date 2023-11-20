@@ -22,7 +22,7 @@ time=(0:dt:dt*(N-1))';
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
-
+segment_size = 3000;  % Number of bits in each message segmentation
 %% Setup the Rx
 rx = comm.SDRuReceiver(...
     'Platform','N200/N210/USRP2',...
@@ -51,7 +51,9 @@ end
 release(rx);
 
 %% process the received signal
-[received_message_bits, received_message_symbols]= Rx_64QAM(rx);
+[received_message_bits, received_message_symbols, ~]= Rx_64QAM(rx_data, segment_size);
+% received_message_bits = received_message_bits(1:96);
+% convert the received_message_bits to strings
 
 % Plot the constellation diagram of received symbols
 figure(1);
@@ -59,7 +61,7 @@ scatterplot(received_message_symbols);
 title('Received Symbols Constellation Diagram');
 
 % convert the received_message_bits to strings
-received_message_string = bits2str(received_message_bits);
+received_message_string = bits2str(received_message_bits(:))
 
 
 %% calculate the BER
@@ -68,6 +70,7 @@ received_message_string = bits2str(received_message_bits);
 message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
+message_bits = message_bits(1:3000);
 
 % Calculate the number of bit errors
 nErrors = biterr(message_bits,received_message_bits);

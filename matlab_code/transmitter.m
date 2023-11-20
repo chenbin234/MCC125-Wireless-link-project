@@ -21,13 +21,16 @@ time=(0:dt:dt*(N-1))';
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
+segment_size = 3000;  % Number of bits in each message segmentation
 
 %% call the Tx_64QAM function
 message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
+message_bits = message_bits(1:3000);
 
-s_tx = Tx_64QAM(message_bits);
+% transmitter
+s_tx = Tx_64QAM(message_bits, segment_size);
 
 %% Setup the Tx
 tx = comm.SDRuTransmitter(... 
