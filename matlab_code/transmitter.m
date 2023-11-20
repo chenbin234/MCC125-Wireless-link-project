@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=6;
+Interp_Factor=64;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -14,23 +14,23 @@ Decimation_Factor=Interp_Factor;
 %% Sampling rate and time
 fs=MasterClock_Rate/Interp_Factor;%sampling rate
 dt=1/fs;%Sampling time
-N=10000;%Numbr of samples in a frame
+N=15000;%Numbr of samples in a frame
 frame_time=N/fs;% Time for 1 frame
 time=(0:dt:dt*(N-1))';
 % s_tx=(0.2*exp(1i*2*pi*100000*time));
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
-segment_size = 3000;  % Number of bits in each message segmentation
+segment_size = 1440;  % Number of bits in each message segmentation
 
 %% call the Tx_64QAM function
 message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
-message_bits = message_bits(1:3000);
+message_bits = message_bits(1:segment_size);
 
 % transmitter
-s_tx = Tx_64QAM(message_bits, segment_size);
+s_tx = 0.5*Tx_64QAM(message_bits, segment_size);
 
 %% Setup the Tx
 tx = comm.SDRuTransmitter(... 
@@ -44,7 +44,7 @@ tx = comm.SDRuTransmitter(...
 'TransportDataType','int16');
   
 currentTime = 0;
-for k=1:200 % a loop 
+for k=1:500 % a loop 
   tx(s_tx') % transmitting the signal s_tx
   currentTime=currentTime+frame_time
 end

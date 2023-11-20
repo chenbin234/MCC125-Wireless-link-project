@@ -2,7 +2,7 @@ function [received_message_bits, received_message_symbols, raw_message_symbol]= 
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
-Rb = 10*1e6;          % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 1*1e6;          % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;         % Carrier frequency [Hz]
 
 M = 64;               % Number of symbols in the constellation
@@ -56,16 +56,30 @@ conv_preamble_pulse = conv(pulse, preamble_upsample); % pulse shaping the upsamp
 corr = conv(rx_freq_correction,fliplr(conv_preamble_pulse));% correlate the recorded signal(maybe have the message) with processed preamble
 % corr = xcorr(conv_preamble_pulse,rx_freq_correction);
 % corr = xcorr(rx_freq_correction,conv_preamble_pulse);
-disp('correlate the recorded signal with conv_preamble_pulse')
+% disp('correlate the recorded signal with conv_preamble_pulse')
 
 corr = corr./length(preamble);                                      % normalize corr 
-figure(3);plot(abs(corr));
+% figure(3);plot(abs(corr));
 
 
 Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 
-if (tmp > Threshold)
+if (tmp < Threshold)
+%     disp('find nothing!')
+    received_message_bits = 0;
+    received_message_symbols=0;
+    raw_message_symbol = 0;
+
+else
+    figure(2);plot(abs(corr));
+
+    figure(3);
+    subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
+    title('Power spetrum of received signal (raw)'); 
+    subplot(2,1,2), pwelch(rx_freq_correction,[],[],[],fs,'centered','power');
+    title('Power spetrum of received signal (after coarse frequency correction)');
+
 
     disp('find the preamble!')
     Tx_hat = Tmax - length(conv_preamble_pulse);      % find delay, Tx_hat+1 is the location of the start(preamble) of the message
@@ -125,24 +139,38 @@ if (tmp > Threshold)
 
 
     % Frequency correction after down-sampling
-    rx_vec=rx_vec(1:length(rx_vec)).*(exp(-1i*2*freq_offset_estimated*pi*Tsymb));% Correcting freq offset
+    rx_preamble_message_fre=rx_preamble_message(1:length(rx_preamble_message)).*(exp(-1i*2*freq_offset_estimated*pi*Tsymb));% Correcting freq offset
     disp('Frequency correction done!')
 
     % Phase correction after down-sampling
-    rx_vec_correction=rx_vec*exp(-1i*p(2));% subtracting phase offset
+    rx_preamble_message_phase=rx_preamble_message_fre*exp(-1i*p(2));% subtracting phase offset
     disp('Phase correction done!')
+
+    preamble_correction = rx_preamble_message_phase(1:length(preamble));
+    message_correction = rx_preamble_message_phase(1+length(preamble):end);
+
+%     figure(4);
+    scatterplot(message_correction);
+    title('QAM Constellation Diagram before rescale');
+
+    % scale parameter, scale the symbol besed on the changes on preamble
+    alpha = mean(abs(preamble_correction));
     
-    rx_vec_correction = zscore(rx_vec_correction);
+    message_correction_scale = message_correction./alpha;
 
-    received_message_symbols = rx_vec_correction;
 
-    received_message_symbols = received_message_symbols./max(abs(received_message_symbols));
+%     rx_vec_scale = zscore(rx_vec_correction);
 
-    received_message_bits = qamdemod(rx_vec_correction,M,'OutputType','bit',UnitAveragePower=true);
+    received_message_symbols = message_correction_scale;
+
+%     received_message_symbols = received_message_symbols./max(abs(received_message_symbols));
+
+    received_message_bits = qamdemod(message_correction_scale,M,'OutputType','bit',UnitAveragePower=true);
+%     received_message_bits = qamdemod(message_correction_scale,M,'OutputType','bit');
     received_message_bits = received_message_bits(:)';
-    
+    disp(['length of decoded message', num2str(length(received_message_bits))]);
     % Plot constellation diagram after Frequency and phase correction
-    figure(5);
+%     figure(5);
     scatterplot(received_message_symbols);
     title('QAM Constellation Diagram after Frequency and phase correction');
 
