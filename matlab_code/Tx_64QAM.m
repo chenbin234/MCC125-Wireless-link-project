@@ -22,6 +22,13 @@ span = 6;             % Pulse width (symbol times of pulse)
 % segment_size = 3000;  % Number of bits in each message segmentation
 
 
+% trellis = poly2trellis(7,[171 133]);
+% tbl = 32;
+% rate = 1/2;
+% message_ENC = convenc(message_bits,trellis);
+
+% message_bits = message_ENC;
+
 % Calculate the number of segments needed
 num_segments = ceil(length(message_bits) / segment_size);
 
@@ -30,7 +37,6 @@ num_segments = ceil(length(message_bits) / segment_size);
 m = buffer(message_bits, bpsymb)';            % Group bits into bits per symbol
 m_idx = bi2de(m, 'left-msb')';              % Bits to symbol index
 x = qammod(m_idx, M, UnitAveragePower=true);  % Look up symbols using the indices
-% x = qammod(m_idx, M);  % Look up symbols using the indices
 
 
 % Add preamble: -––––––––––––––––––––––––––––––––––––––––––––––––––––––––––

@@ -62,11 +62,12 @@ corr = corr./length(preamble);                                      % normalize 
 % figure(3);plot(abs(corr));
 
 
-Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
+Threshold = 0.5;                                      % if corr has a peak over 0.8, there are messages in transmitter
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 
 if (tmp < Threshold)
-%     disp('find nothing!')
+    disp('find nothing!')
+    figure(2);plot(abs(corr));
     received_message_bits = 0;
     received_message_symbols=0;
     raw_message_symbol = 0;
@@ -102,7 +103,7 @@ else
     %Filter with MF
     %MF_output = filter(MF, 1, y);
 
-    % MF_output = MF_output/max(abs(MF_output));            % normalize
+%     MF_output = MF_output/max(abs(MF_output));            % normalize
     disp('Matched Filtering done!')
 
 %% 4. Down Sampling
@@ -114,6 +115,10 @@ else
     %MF_output_downsample = downsample(MF_output(:), fsfd);
     %rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
     raw_message_symbol = rx_vec;
+
+    scatterplot(rx_vec);
+    title('downsampling');
+
 %% 5. Frequency and phase correction
 
     % Phase synchronization & Frequency synchronization
@@ -126,24 +131,32 @@ else
     % polyfit(x,phase), the intercept is phase offset, the slope is 2*pi*frequency_offset
     % we can got the phase offset and frequency_offset
     
-    time_symb_synk = Tsymb*[1:1:length(preamble)];
+    time_symb_synk = (0:length(preamble)-1)*Tsymb;
+    p1 = polyfit(time_symb_synk,phase_slope,1);
+    % phase_slope_fit = polyval(p,time_symb_synk);
 
-    p = polyfit(time_symb_synk,phase_slope,1);
-    phase_slope_fit = polyval(p,time_symb_synk);
-
-    freq_offset_estimated=p(1)/(2*pi);% In Hz
-    phase_offset_estimated_deg=360*(p(2))/(2*pi);
+    freq_offset_estimated=p1(1)/(2*pi);% In Hz
+    %phase_offset_estimated_deg=360*(p(2))/(2*pi);
     
     disp(['Frequency offset estimated: ',num2str(freq_offset_estimated), 'Hz'])
-    disp(['Phase offset estimated: ',num2str(phase_offset_estimated_deg), 'degree'])
+    %disp(['Phase offset estimated: ',num2str(phase_offset_estimated_deg), 'degree'])
 
 
     % Frequency correction after down-sampling
-    rx_preamble_message_fre=rx_preamble_message(1:length(rx_preamble_message)).*(exp(-1i*2*freq_offset_estimated*pi*Tsymb));% Correcting freq offset
+    time_ds = (0:length(rx_preamble_message)-1)*Tsymb;
+    rx_preamble_message_freq=rx_preamble_message.* exp(-1i * 2 * pi * freq_offset_estimated * time_ds);% Correcting freq offset
     disp('Frequency correction done!')
 
+
+
+    phase_slope2 = unwrap(angle(rx_preamble_message_freq(1:length(preamble))) - angle(preamble));
+    p2 = polyfit(time_symb_synk,phase_slope2,1);
+
+    phase_offset_estimated_deg=360*(p2(2))/(2*pi);
+    disp(['Phase offset estimated: ',num2str(phase_offset_estimated_deg), 'degree'])
+    
     % Phase correction after down-sampling
-    rx_preamble_message_phase=rx_preamble_message_fre*exp(-1i*p(2));% subtracting phase offset
+    rx_preamble_message_phase=rx_preamble_message_freq*exp(-1i*p2(2));% subtracting phase offset
     disp('Phase correction done!')
 
     preamble_correction = rx_preamble_message_phase(1:length(preamble));
@@ -154,23 +167,31 @@ else
     title('QAM Constellation Diagram before rescale');
 
     % scale parameter, scale the symbol besed on the changes on preamble
-    alpha = mean(abs(preamble_correction));
+    b = mean(abs(preamble_correction));
     
-    message_correction_scale = message_correction./alpha;
+    message_correction_scale = message_correction./b;
 
 
-%     rx_vec_scale = zscore(rx_vec_correction);
 
     received_message_symbols = message_correction_scale;
 
-%     received_message_symbols = received_message_symbols./max(abs(received_message_symbols));
 
     received_message_bits = qamdemod(message_correction_scale,M,'OutputType','bit',UnitAveragePower=true);
-%     received_message_bits = qamdemod(message_correction_scale,M,'OutputType','bit');
     received_message_bits = received_message_bits(:)';
     disp(['length of decoded message', num2str(length(received_message_bits))]);
+    
+    
+    
+
+    % Viterbi decode the demodulated data
+%     trellis = poly2trellis(7,[171 133]);
+%     tbl = 32;
+%     rate = 1/2;
+%     received_message_bits = vitdec(received_message_bits,trellis,tbl,'cont','hard');
+
+
+    
     % Plot constellation diagram after Frequency and phase correction
-%     figure(5);
     scatterplot(received_message_symbols);
     title('QAM Constellation Diagram after Frequency and phase correction');
 

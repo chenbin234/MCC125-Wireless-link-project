@@ -17,6 +17,10 @@ tau = 1/fsymb;        % Nyquist period or symbol time
 span = 6;             % Pulse width (symbol times of pulse)
 segment_size = 3000;  % Number of bits in each message segmentation
 
+% trellis = poly2trellis(7,[171 133]);
+% tbl = 32;
+% rate = 1/2;
+
 % message to be send
 % message_string = 'Heooo sname!';
 % message_string = 'Hello World!';
@@ -34,11 +38,11 @@ subplot(2,1,1), pwelch(s_tx,[],[],[],fs,'centered','power');
 title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
 % 
 %channel
-rxSig = awgn(s_tx,10,'measured');
+rxSig = awgn(s_tx,20,'measured');
 
 % add Frequency offset
 t = (0:length(rxSig)-1)/fs;  % Time vector
-frequency_offset = 20000;  % Adjust as needed
+frequency_offset = 600;  % Adjust as needed
 s_tx_frequency_offset = rxSig.* exp(1i * 2 * pi * frequency_offset * t);
 
 % add Phase offset
@@ -50,7 +54,7 @@ title('Power spetrum of Transmitted Signal after Noise');
 
 % receiver
 
-[received_message_bits, received_message_symbols, ~]= Rx_64QAM(s_tx, segment_size);
+[received_message_bits, received_message_symbols, ~]= Rx_64QAM(s_tx_phase_offset, segment_size);
 
 % convert the received_message_bits to strings
 received_message_string = bits2str(received_message_bits(:))
