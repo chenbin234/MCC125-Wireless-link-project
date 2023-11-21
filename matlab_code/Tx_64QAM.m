@@ -22,15 +22,15 @@ span = 6;             % Pulse width (symbol times of pulse)
 % segment_size = 3000;  % Number of bits in each message segmentation
 
 
-% trellis = poly2trellis(7,[171 133]);
-% tbl = 32;
-% rate = 1/2;
-% message_ENC = convenc(message_bits,trellis);
+% concolutional encoding
+trellis = poly2trellis([5 4],[23 35 0; 0 5 13]);
+traceBack = 28;
+codeRate = 2/3;
+message_bits = convenc(message_bits,trellis);
 
-% message_bits = message_ENC;
 
 % Calculate the number of segments needed
-num_segments = ceil(length(message_bits) / segment_size);
+% num_segments = ceil(length(message_bits) / segment_size);
 
 
 % Bit to symbol mapping & spacing: -–––––––––––––––––––––––––––––––––––––––
@@ -47,27 +47,27 @@ preamble = repmat(preamble,1,10);
 % x = [preamb, x]; 
 
 % Initialize the output vector
-message_symbol = [];
+message_symbol = [preamble x];
 
-% Loop through segments
-for i = 1:num_segments
-    % Extract the current segment
-    start_index = (i - 1) * (segment_size./bpsymb) + 1;
-    end_index = min(i * (segment_size./bpsymb), length(x));
-    current_symbol_segment = x(start_index:end_index);
-    
-    % If the total number of bits is not exactly divisible by segment_size(3000), add zeros at the end
-    if mod(length(current_symbol_segment), (segment_size./bpsymb)) ~= 0
-        num_zeros_to_add = (segment_size./bpsymb) - mod(length(current_symbol_segment), (segment_size./bpsymb));
-        current_symbol_segment = [current_symbol_segment, zeros(1, num_zeros_to_add)];
-    end
-
-    % Add preamble before the segment
-    symbol_segment_with_preamble = [preamble, current_symbol_segment];
-
-    % Append the current segment to the output vector
-    message_symbol = [message_symbol, symbol_segment_with_preamble];
-end
+% % Loop through segments
+% for i = 1:num_segments
+%     % Extract the current segment
+%     start_index = (i - 1) * (segment_size./bpsymb) + 1;
+%     end_index = min(i * (segment_size./bpsymb), length(x));
+%     current_symbol_segment = x(start_index:end_index);
+%     
+%     % If the total number of bits is not exactly divisible by segment_size(3000), add zeros at the end
+%     if mod(length(current_symbol_segment), (segment_size./bpsymb)) ~= 0
+%         num_zeros_to_add = (segment_size./bpsymb) - mod(length(current_symbol_segment), (segment_size./bpsymb));
+%         current_symbol_segment = [current_symbol_segment, zeros(1, num_zeros_to_add)];
+%     end
+% 
+%     % Add preamble before the segment
+%     symbol_segment_with_preamble = [preamble, current_symbol_segment];
+% 
+%     % Append the current segment to the output vector
+%     message_symbol = [message_symbol, symbol_segment_with_preamble];
+% end
 
 % figure(12);
 scatterplot(message_symbol);

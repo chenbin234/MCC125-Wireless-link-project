@@ -28,7 +28,7 @@ received_signal = received_signal./max(abs(received_signal));  % normalise recei
 preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
 preamble = repmat(preamble,1,10);
 %% 1. Coarse frequency correction
-dc_offset_value = 1;
+dc_offset_value = 5;
 received_signal_with_dc_offset = received_signal + dc_offset_value;
 
 [pxx, f] = pwelch(received_signal_with_dc_offset.',[],[],[],fs,'centered','power');
@@ -184,10 +184,10 @@ else
     
 
     % Viterbi decode the demodulated data
-%     trellis = poly2trellis(7,[171 133]);
-%     tbl = 32;
-%     rate = 1/2;
-%     received_message_bits = vitdec(received_message_bits,trellis,tbl,'cont','hard');
+    trellis = poly2trellis([5 4],[23 35 0; 0 5 13]);
+    traceBack = 28;
+    codeRate = 2/3;
+    received_message_bits = vitdec(received_message_bits,trellis,traceBack,'trunc','hard');
 
 
     
