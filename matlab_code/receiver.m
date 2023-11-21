@@ -22,7 +22,8 @@ time=(0:dt:dt*(N-1))';
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
-segment_size = 1440;  % Number of bits in each message segmentation
+segment_size = 960;  % Number of bits in each message segmentation
+random_number = 5; % choose to send different messages
 %% Setup the Rx
 rx = comm.SDRuReceiver(...
     'Platform','N200/N210/USRP2',...
@@ -75,21 +76,25 @@ release(rx);
 % convert the received_message_bits to strings
 % received_message_string = bits2str(received_message_bits(:))
 
+if length(received_message_bits)~=1
 
-%% calculate the BER
+    %% calculate the BER
+    
+    % True transmitting message
+    message_lines = readlines("message.txt");
+    message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
+    message_bits = str2bits(message_string);
+    message_bits = message_bits(random_number*segment_size+1:random_number*(segment_size+1));
+    
+    % Calculate the number of bit errors
+    nErrors = biterr(message_bits,received_message_bits);
+    
+    % Display the result
+    disp(['The message transmitted :  ', message_string])
+    % disp(['The message received    :  ', received_message_string])
+    disp(['Number of bit errors    :  ', num2str(nErrors)])
+else
+    disp('Did not detect message in this round.')
 
-% True transmitting message
-message_lines = readlines("message.txt");
-message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
-message_bits = str2bits(message_string);
-message_bits = message_bits(1:segment_size);
-
-% Calculate the number of bit errors
-nErrors = biterr(message_bits,received_message_bits);
-
-% Display the result
-disp(['The message transmitted :  ', message_string])
-% disp(['The message received    :  ', received_message_string])
-disp(['Number of bit errors    :  ', num2str(nErrors)])
-
+end
 

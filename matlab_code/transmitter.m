@@ -21,13 +21,13 @@ time=(0:dt:dt*(N-1))';
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
-segment_size = 1440;  % Number of bits in each message segmentation
-
+segment_size = 960;  % Number of bits in each message segmentation
+random_number = 5; % choose to send different messages
 %% call the Tx_64QAM function
 message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
-message_bits = message_bits(1:segment_size);
+message_bits = message_bits(random_number*segment_size+1:random_number*(segment_size+1));
 
 % transmitter
 s_tx = 0.5*Tx_64QAM(message_bits, segment_size);
