@@ -1,4 +1,4 @@
-function tx_signal = Tx_64QAM(message_bits, segment_size)
+function tx_signal = Tx_64QAM(message_bits)
 % This function is to send message in 64QAM.
 % message_bits = message to be transmitted.
 % fc = carrier frequency
@@ -70,7 +70,7 @@ message_symbol = [preamble x];
 % end
 
 % figure(12);
-scatterplot(message_symbol);
+scatterplot(message_symbol(length(preamble)+1:end));
 title('QAM Constellation Diagram transmitted signal');
 
 x_upsample = upsample(message_symbol, fsfd);               % Space the symbols fsfd apart, to enable pulse shaping using conv.

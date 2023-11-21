@@ -36,15 +36,15 @@ message_string = strjoin(message_lines, ' '); % Combine the lines into a single 
 message_bits = str2bits(message_string);
 message_bits = message_bits(1:segment_size);
 % transmitter
-s_tx = Tx_64QAM(message_bits, segment_size);
+s_tx = Tx_64QAM(message_bits);
 
 
-figure(11);
-subplot(2,1,1), pwelch(s_tx,[],[],[],fs,'centered','power');
-title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
+% figure(11);
+% subplot(2,1,1), pwelch(s_tx,[],[],[],fs,'centered','power');
+% title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
 % 
 %channel
-rxSig = awgn(s_tx,20,'measured');
+rxSig = awgn(s_tx,15,'measured');
 
 % add Frequency offset
 t = (0:length(rxSig)-1)/fs;  % Time vector
@@ -55,8 +55,8 @@ s_tx_frequency_offset = rxSig.* exp(1i * 2 * pi * frequency_offset * t);
 phase_offset = -pi/8;  % Adjust as needed
 s_tx_phase_offset = s_tx_frequency_offset * exp(1i * phase_offset);
  
-subplot(2,1,2), pwelch(s_tx_frequency_offset,[],[],[],fs,'centered','power');
-title('Power spetrum of Transmitted Signal after Noise'); 
+% subplot(2,1,2), pwelch(s_tx_frequency_offset,[],[],[],fs,'centered','power');
+% title('Power spetrum of Transmitted Signal after Noise'); 
 
 % receiver
 

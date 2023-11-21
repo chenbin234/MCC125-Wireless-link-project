@@ -107,9 +107,30 @@ else
     disp('Matched Filtering done!')
 
 %% 4. Down Sampling
-    MF_output_cut = MF_output(2*span*fsfd-1:end-2*span*fsfd+1);  % cut the beginning and end of match filter output
-    MF_output_cut_without_premable = MF_output(2*span*fsfd-1+length(preamble)*fsfd:end-2*span*fsfd+1); % cut the preamble part
-    rx_preamble_message = MF_output_cut(1:fsfd:end);      % dowmsampling, get the preamble+message                 
+    MF_output_cut = MF_output(2*span*fsfd-1:end-2*span*fsfd+2);  % cut the beginning and end of match filter output
+    symb = MF_output_cut;
+    e = zeros(size(MF_output_cut));
+    for k = 2:1:length(symb)-1
+        eI(k) = abs(real(symb(k-1)) - real(symb(k+1)));
+        eQ(k) = abs(imag(symb(k-1)) - imag(symb(k+1)));
+        e(k) = eI(k) + eQ(k);  % 1 x all samples
+    end
+    
+    error = reshape(e, fsfd, []);  % [s_per_symb length(symb)/s_per_symb]
+    error_sum = sum(error, 2);  % [samples_per_symbol 1]
+    figure(15);
+    plot(error_sum);
+    title('sum of error');
+    
+    % find the index minimum value of error
+    [~, k] = min(error_sum);
+    disp(['The k value is: ',num2str(k)])
+
+%     MF_output_cut = MF_output(2*span*fsfd-1:end-2*span*fsfd+1);  % cut the beginning and end of match filter output
+%     MF_output_cut_without_premable = MF_output(2*span*fsfd-1+length(preamble)*fsfd:end-2*span*fsfd+1); % cut the preamble part
+%     rx_preamble_message = MF_output_cut(1:fsfd:end);      % dowmsampling, get the preamble+message                 
+    
+    rx_preamble_message = MF_output_cut(k:fsfd:end);      % dowmsampling, get the preamble+message
     rx_vec = rx_preamble_message(1+length(preamble):end); % get the message
       
     %MF_output_downsample = downsample(MF_output(:), fsfd);
@@ -163,32 +184,28 @@ else
     message_correction = rx_preamble_message_phase(1+length(preamble):end);
 
 %     figure(4);
-    scatterplot(message_correction);
-    title('QAM Constellation Diagram before rescale');
+%     scatterplot(message_correction);
+%     title('QAM Constellation Diagram before rescale');
 
     % scale parameter, scale the symbol besed on the changes on preamble
     b = mean(abs(preamble_correction));
-    
     message_correction_scale = message_correction./b;
 
 
-
+    % the received_message_symbols got here is 1./codeRate size of the
+    % sending message symbol (because of convolution encoding).
     received_message_symbols = message_correction_scale;
 
-
+    % demodulate
     received_message_bits = qamdemod(message_correction_scale,M,'OutputType','bit',UnitAveragePower=true);
     received_message_bits = received_message_bits(:)';
     disp(['length of decoded message', num2str(length(received_message_bits))]);
     
-    
-    
-
     % Viterbi decode the demodulated data
     trellis = poly2trellis([5 4],[23 35 0; 0 5 13]);
     traceBack = 28;
     codeRate = 2/3;
     received_message_bits = vitdec(received_message_bits,trellis,traceBack,'trunc','hard');
-
 
     
     % Plot constellation diagram after Frequency and phase correction
