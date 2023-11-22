@@ -4,7 +4,7 @@ function [received_message_bits, received_message_symbols, raw_message_symbol]= 
 %% ###### Basic parameter ######
 Rb = 1*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;         % Carrier frequency [Hz]
-N=15000;              % Numbr of samples in a frame
+N=40000;              % Numbr of samples in a frame
 
 M = 64;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 

@@ -14,15 +14,15 @@ Decimation_Factor=Interp_Factor;
 %% Sampling rate and time
 fs=MasterClock_Rate/Interp_Factor;%sampling rate
 dt=1/fs;%Sampling time
-N=10000;%Numbr of samples in a frame
+N=20000;%Numbr of samples in a frame
 frame_time=N/fs;% Time for 1 frame
 time=(0:dt:dt*(N-1))';
 % s_tx=(0.2*exp(1i*2*pi*100000*time));
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
-segment_size = 960;  % Number of bits in each message segmentation
-random_number = 5; % choose to send different messages
+segment_size =7*960;  % Number of bits in each message segmentation
+random_number = 0; % choose to send different messages
 %% call the Tx_64QAM function
 message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
