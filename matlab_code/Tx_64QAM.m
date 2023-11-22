@@ -4,7 +4,7 @@ function tx_signal = Tx_64QAM(message_bits)
 % fc = carrier frequency
 
 % Input parameters -–––––––––––––––––––––––––––––––––––––––––––––––––––––––
-Rb = 1*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 0.01*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;            % Carrier frequency [Hz]
 
 M = 64;               % Number of symbols in the constellation
@@ -70,8 +70,8 @@ message_symbol = [preamble x];
 % end
 
 % figure(12);
-scatterplot(message_symbol(length(preamble)+1:end));
-title('QAM Constellation Diagram transmitted signal');
+% scatterplot(message_symbol(length(preamble)+1:end));
+% title('QAM Constellation Diagram transmitted signal');
 
 x_upsample = upsample(message_symbol, fsfd);               % Space the symbols fsfd apart, to enable pulse shaping using conv.
 

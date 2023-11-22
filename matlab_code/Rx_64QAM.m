@@ -2,7 +2,7 @@ function [received_message_bits, received_message_symbols, raw_message_symbol]= 
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
-Rb = 1*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 0.01*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;         % Carrier frequency [Hz]
 N=15000;              % Numbr of samples in a frame
 
@@ -35,10 +35,10 @@ received_signal_with_dc_offset = received_signal + dc_offset_value;
 [pxx, f] = pwelch(received_signal_with_dc_offset.',[],[],[],fs,'centered','power');
 index = find(pxx == max(pxx));
 freq_shift_coarse = f(index);
-disp(['The estimated coarse frequency offset is',num2str(freq_shift_coarse)])
+% disp(['The estimated coarse frequency offset is',num2str(freq_shift_coarse)])
 % first coarse frequency correction
 rx_freq_correction = received_signal.*exp(2*-1i*pi*(freq_shift_coarse)*(0:length(received_signal)-1)*1/fs); 
-disp('Coarse frequency correction done!')
+% disp('Coarse frequency correction done!')
 % figure(2);
 % subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
 % title('Power spetrum of received signal (raw)'); 
@@ -63,7 +63,7 @@ corr = corr./length(preamble);                                      % normalize 
 % figure(3);plot(abs(corr));
 
 
-Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
+Threshold = 0.5;                                      % if corr has a peak over 0.8, there are messages in transmitter
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 Tx_hat = Tmax - length(conv_preamble_pulse);          % find delay, Tx_hat+1 is the location of the start(preamble) of the message
 length_signal = (fsfd*(length(preamble)+(segment_size./bpsymb))+length(pulse)-1); %length of preamble+message in y
@@ -71,7 +71,7 @@ length_signal = (fsfd*(length(preamble)+(segment_size./bpsymb))+length(pulse)-1)
 
 if (tmp < Threshold)
     disp('find nothing !')
-    % figure(2);plot(abs(corr));
+    figure(2);plot(abs(corr));
     received_message_bits = 0;
     received_message_symbols=0;
     raw_message_symbol = 0;
@@ -209,14 +209,14 @@ else
     % demodulate
     received_message_bits = qamdemod(message_correction_scale,M,'OutputType','bit',UnitAveragePower=true);
     received_message_bits = received_message_bits(:)';
-    disp(['length of decoded message', num2str(length(received_message_bits))]);
+    % disp(['length of decoded message', num2str(length(received_message_bits))]);
     
     % Viterbi decode the demodulated data
     trellis = poly2trellis([5 4],[23 35 0; 0 5 13]);
     traceBack = 28;
     codeRate = 2/3;
     received_message_bits = vitdec(received_message_bits,trellis,traceBack,'trunc','hard');
-
+    disp(['length of decoded message', num2str(length(received_message_bits))]);
     
     % Plot constellation diagram after Frequency and phase correction
     scatterplot(received_message_symbols);

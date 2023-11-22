@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=20;
+Interp_Factor=64;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -14,7 +14,7 @@ Decimation_Factor=Interp_Factor;
 %% Sampling rate and time
 fs=MasterClock_Rate/Interp_Factor;%sampling rate
 dt=1/fs;%Sampling time
-N=15000;%Numbr of samples in a frame
+N=20000;%Numbr of samples in a frame
 frame_time=N/fs;% Time for 1 frame
 time=(0:dt:dt*(N-1))';
 % s_tx=(0.2*exp(1i*2*pi*100000*time));
@@ -23,6 +23,7 @@ RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
 segment_size = 960;  % Number of bits in each message segmentation
+codeRate = 2/3;
 random_number = 5; % choose to send different messages
 %% Setup the Rx
 rx = comm.SDRuReceiver(...
@@ -37,7 +38,7 @@ rx = comm.SDRuReceiver(...
     'TransportDataType','int16');
 
 currentTime = 0;
-for k=1:200 % a loop 
+for k=1:2000 % a loop 
   %% Start the Rx
     [rx_data] = rx();
     rx_data=double(rx_data)/(2^16);
@@ -46,13 +47,13 @@ for k=1:200 % a loop
 %   rx_dsb=10*log10(RBW*rx_dsb)+15;% In dBm
 %   figure(1);subplot(2,1,1);plot(time,real(rx_data),'r',time,imag(rx_data),'b');%ylim([-1 1]);grid;ylabel('V');hold on;
 %   figure(1);subplot(2,1,2);plot(f, rx_dsb);ylim([-120 10]);grid;ylabel('dBm');
-    [received_message_bits, received_message_symbols, ~]= Rx_64QAM(rx_data', segment_size);
+    [received_message_bits, received_message_symbols, ~]= Rx_64QAM(rx_data', segment_size./codeRate);
     
     if length(received_message_bits)~=1
 
-        figure(1);
-        scatterplot(received_message_symbols);
-        title('Received Symbols Constellation Diagram');
+%         figure(1);
+%         scatterplot(received_message_symbols);
+%         title('Received Symbols Constellation Diagram');
     
         % convert the received_message_bits to strings
         received_message_string = bits2str(received_message_bits(:));
@@ -84,7 +85,7 @@ if length(received_message_bits)~=1
     message_lines = readlines("message.txt");
     message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
     message_bits = str2bits(message_string);
-    message_bits = message_bits(random_number*segment_size+1:random_number*(segment_size+1));
+    message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segment_size);
     
     % Calculate the number of bit errors
     nErrors = biterr(message_bits,received_message_bits);

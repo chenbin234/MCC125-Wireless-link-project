@@ -16,8 +16,8 @@ alpha = 0.8;          % Roll off factor / Excess bandwidth factor (a_RC=0.35;a_R
 tau = 1/fsymb;        % Nyquist period or symbol time 
 span = 6;             % Pulse width (symbol times of pulse)
 
-segment_size = 4800;  % Number of bits in each message segmentation
-random_number = 1; % choose to send different messages
+segment_size = 960;  % Number of bits in each message segmentation
+random_number = 0; % choose to send different messages
 
 
 trellis = poly2trellis([5 4],[23 35 0; 0 5 13]);
@@ -29,7 +29,7 @@ message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
 message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segment_size);
-message_bits = randi([0, 1], 1, segment_size);
+% message_bits = randi([0, 1], 1, segment_size);
 
 % transmitter
 s_tx = Tx_64QAM(message_bits);
