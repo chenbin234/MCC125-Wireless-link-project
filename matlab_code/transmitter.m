@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=60;
+Interp_Factor=70;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -29,8 +29,10 @@ message_string = strjoin(message_lines, ' '); % Combine the lines into a single 
 message_bits = str2bits(message_string);
 message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segment_size);
 
+disp(['The message transmitted :  ', bits2str(message_bits)])
+
 % transmitter
-s_tx = 0.5*Tx_64QAM(message_bits);
+s_tx = 0.7*Tx_64QAM(message_bits);
 
 %% Setup the Tx
 tx = comm.SDRuTransmitter(... 
