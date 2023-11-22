@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=64;
+Interp_Factor=60;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -91,7 +91,7 @@ if length(received_message_bits)~=1
     nErrors = biterr(message_bits,received_message_bits);
     
     % Display the result
-    disp(['The message transmitted :  ', message_string])
+    disp(['The message transmitted :  ', bits2str(message_bits)])
     % disp(['The message received    :  ', received_message_string])
     disp(['Number of bit errors    :  ', num2str(nErrors)])
 else

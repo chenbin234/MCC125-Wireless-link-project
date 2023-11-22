@@ -2,7 +2,7 @@ function [received_message_bits, received_message_symbols, raw_message_symbol]= 
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
-Rb = 0.01*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 1*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;         % Carrier frequency [Hz]
 N=15000;              % Numbr of samples in a frame
 
