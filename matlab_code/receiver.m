@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=70;
+Interp_Factor=10;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -22,7 +22,7 @@ time=(0:dt:dt*(N-1))';
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
-segment_size = 7*960;  % Number of bits in each message segmentation
+segment_size = 10*960;  % Number of bits in each message segmentation
 codeRate = 2/3;
 random_number = 0; % choose to send different messages
 %% Setup the Rx

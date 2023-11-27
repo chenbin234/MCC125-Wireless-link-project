@@ -2,11 +2,11 @@ function [received_message_bits, received_message_symbols, raw_message_symbol]= 
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
-Rb = 1*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 10*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;         % Carrier frequency [Hz]
 N=40000;              % Numbr of samples in a frame
 
-M = 128;               % Number of symbols in the constellation
+M = 256;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
@@ -35,7 +35,7 @@ received_signal_with_dc_offset = received_signal + dc_offset_value;
 [pxx, f] = pwelch(received_signal_with_dc_offset.',[],[],[],fs,'centered','power');
 index = find(pxx == max(pxx));
 freq_shift_coarse = f(index);
-% disp(['The estimated coarse frequency offset is',num2str(freq_shift_coarse)])
+disp(['The estimated coarse frequency offset is',num2str(freq_shift_coarse)])
 % first coarse frequency correction
 rx_freq_correction = received_signal.*exp(2*-1i*pi*(freq_shift_coarse)*(0:length(received_signal)-1)*1/fs); 
 % disp('Coarse frequency correction done!')
@@ -63,7 +63,7 @@ corr = corr./length(preamble);                                      % normalize 
 % figure(3);plot(abs(corr));
 
 
-Threshold = 0.5;                                      % if corr has a peak over 0.8, there are messages in transmitter
+Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 Tx_hat = Tmax - length(conv_preamble_pulse);          % find delay, Tx_hat+1 is the location of the start(preamble) of the message
 length_signal = (fsfd*(length(preamble)+(segment_size./bpsymb))+length(pulse)-1); %length of preamble+message in y
@@ -76,7 +76,7 @@ if (tmp < Threshold)
     received_message_symbols=0;
     raw_message_symbol = 0;
 
-elseif (Tx_hat + length_signal > N)
+elseif (Tx_hat + length_signal > N || Tx_hat < 0)
     disp('find the preamble, but the message is invalid (truncated), try to detect other valid frames.')
     received_message_bits = 0;
     received_message_symbols=0;

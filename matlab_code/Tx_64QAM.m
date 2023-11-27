@@ -4,10 +4,10 @@ function tx_signal = Tx_64QAM(message_bits)
 % fc = carrier frequency
 
 % Input parameters -–––––––––––––––––––––––––––––––––––––––––––––––––––––––
-Rb = 1*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 10*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;            % Carrier frequency [Hz]
 
-M = 128;               % Number of symbols in the constellation
+M = 256;               % Number of symbols in the constellation
 
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
