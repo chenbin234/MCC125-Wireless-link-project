@@ -1,0 +1,2 @@
+Barker codes are a set of binary sequences that are widely used in radar and telecommunications for their desirable autocorrelation properties.
+Bingcheng.

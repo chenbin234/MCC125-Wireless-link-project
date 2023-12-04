@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=5;
+Interp_Factor=1;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;

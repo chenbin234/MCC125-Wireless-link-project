@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=10;
+Interp_Factor=5;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -14,7 +14,7 @@ Decimation_Factor=Interp_Factor;
 %% Sampling rate and time
 fs=MasterClock_Rate/Interp_Factor;%sampling rate
 dt=1/fs;%Sampling time
-N=40000;%Numbr of samples in a frame
+N=50000;%Numbr of samples in a frame
 frame_time=N/fs;% Time for 1 frame
 time=(0:dt:dt*(N-1))';
 % s_tx=(0.2*exp(1i*2*pi*100000*time));
@@ -26,20 +26,21 @@ segment_size = 10*960;  % Number of bits in each message segmentation
 codeRate = 2/3;
 random_number = 0; % choose to send different messages
 %% Setup the Rx
+% for k=1:500 % a loop 
 rx = comm.SDRuReceiver(...
     'Platform','N200/N210/USRP2',...
     'IPAddress','192.168.10.4',...
     'CenterFrequency',10e6,...
-    'EnableBurstMode',1,...
-    'NumFramesInBurst',1,...
+    'EnableBurstMode',0,...
     'DecimationFactor',Decimation_Factor,...
     'SamplesPerFrame',N,...
     'MasterClockRate',MasterClock_Rate,...
     'TransportDataType','int16');
 
 currentTime = 0;
-for k=1:2000 % a loop 
+for k=1:1000 % a loop 
   %% Start the Rx
+%     pause(1);
     [rx_data] = rx();
     rx_data=double(rx_data)/(2^16);
 
@@ -61,6 +62,7 @@ for k=1:2000 % a loop
         break;
     end
 %     currentTime=currentTime+frame_time
+% release(rx);
 end
 release(rx);
 
