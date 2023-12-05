@@ -62,15 +62,16 @@ for i = 1:number_data
         [rx_data] = rx();
         rx_data=double(rx_data)/(2^16);
     
-        [received_message_bits, received_message_symbols, feature_symbols, detect_preamble]= Rx_1024QAM(rx_data', segment_size./codeRate);
+        [received_message_bits, received_message_symbols, feature_symbols]= Rx_1024QAM(rx_data', segment_size./codeRate);
         
-        if detect_preamble == 1
+        if length(received_message_bits)~=1
         
             % convert the received_message_bits to strings
-            %received_message_string = bits2str(received_message_bits(:));
-            %disp(['The message received    :  ', received_message_string])
-            
-            feature_symbol(message_number_received,:) = feature_symbols;
+            received_message_string = bits2str(received_message_bits(:));
+            disp(['The message received    :  ', received_message_string])
+
+            feature_symbol(message_number_received)
+
 
 
             break;
@@ -83,10 +84,3 @@ for i = 1:number_data
 
 end
 
-% Specify the Excel file name
-feature_file = 'feature_symbol_dataset.csv';
-
-% Write the random numbers to the Excel file
-writematrix(feature_symbol, feature_file);
-
-disp(['Feature symbols have been written to ',feature_file]);

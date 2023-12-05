@@ -1,16 +1,15 @@
-function [received_message_bits, received_message_symbols, raw_message_symbol]= Rx_64QAM(received_signal, segment_size)
+function [received_message_bits, received_message_symbols, MF_output_cut_without_premable]= Rx_1024QAM(received_signal, segment_size)
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
-Rb = 20*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
-fc = 2.4*1e9;         % Carrier frequency [Hz]
+Rb = 333*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 N=40000;              % Numbr of samples in a frame
 
 M = 1024;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
-fs = 10*fsymb;        % Sampling frequency [Hz]
+fs = 3*fsymb;        % Sampling frequency [Hz]
 Tsamp = 1/fs;         % Sampling time
 fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 
@@ -63,7 +62,7 @@ corr = corr./length(preamble);                                      % normalize 
 % figure(3);plot(abs(corr));
 
 
-Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
+Threshold = 0.5;                                      % if corr has a peak over 0.8, there are messages in transmitter
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 Tx_hat = Tmax - length(conv_preamble_pulse);          % find delay, Tx_hat+1 is the location of the start(preamble) of the message
 length_signal = (fsfd*(length(preamble)+(segment_size./bpsymb))+length(pulse)-1); %length of preamble+message in y
@@ -74,13 +73,14 @@ if (tmp < Threshold)
     figure(2);plot(abs(corr));
     received_message_bits = 0;
     received_message_symbols=0;
-    raw_message_symbol = 0;
+    MF_output_cut_without_premable = 0;
+    detec_preamble = 0
 
 elseif (Tx_hat + length_signal > N || Tx_hat < 0)
     disp('find the preamble, but the message is invalid (truncated), try to detect other valid frames.')
     received_message_bits = 0;
     received_message_symbols=0;
-    raw_message_symbol = 0;
+    MF_output_cut_without_premable = 0;
     
 else
     figure(2);plot(abs(corr));
@@ -136,16 +136,16 @@ else
     [~, k] = min(error_sum);
     disp(['The k value is: ',num2str(k)])
 
-%     MF_output_cut = MF_output(2*span*fsfd-1:end-2*span*fsfd+1);  % cut the beginning and end of match filter output
-%     MF_output_cut_without_premable = MF_output(2*span*fsfd-1+length(preamble)*fsfd:end-2*span*fsfd+1); % cut the preamble part
-%     rx_preamble_message = MF_output_cut(1:fsfd:end);      % dowmsampling, get the preamble+message                 
+    %MF_output_cut = MF_output(2*span*fsfd-1:end-2*span*fsfd+1);  % cut the beginning and end of match filter output
+    MF_output_cut_without_premable = MF_output(2*span*fsfd-1+length(preamble)*fsfd:end-2*span*fsfd+2); % cut the preamble part
+    %rx_preamble_message_test = MF_output_cut(1:fsfd:end);      % dowmsampling, get the preamble+message                 
     
     rx_preamble_message = MF_output_cut(k:fsfd:end);      % dowmsampling, get the preamble+message
     rx_vec = rx_preamble_message(1+length(preamble):end); % get the message
       
     %MF_output_downsample = downsample(MF_output(:), fsfd);
     %rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
-    raw_message_symbol = rx_vec;
+%     raw_message_symbol = rx_vec;
 
     scatterplot(rx_vec);
     title('Downsampling');

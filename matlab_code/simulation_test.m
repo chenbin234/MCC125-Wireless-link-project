@@ -1,10 +1,10 @@
 clear all;clc;
 % Input parameters -–––––––––––––––––––––––––––––––––––––––––––––––––––––––
-Rb = 1*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 333*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 % N = length(message_bits);% Number of bits to transmit
 fc = 2.4*1e9;            % Carrier frequency [Hz]
 
-M = 64;               % Number of symbols in the constellation
+M = 1024;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
@@ -16,7 +16,7 @@ alpha = 0.8;          % Roll off factor / Excess bandwidth factor (a_RC=0.35;a_R
 tau = 1/fsymb;        % Nyquist period or symbol time 
 span = 6;             % Pulse width (symbol times of pulse)
 
-segment_size = 960;  % Number of bits in each message segmentation
+segment_size = 100;  % Number of bits in each message segmentation
 random_number = 0; % choose to send different messages
 
 
@@ -32,7 +32,7 @@ message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segme
 % message_bits = randi([0, 1], 1, segment_size);
 
 % transmitter
-s_tx = Tx_64QAM(message_bits);
+s_tx = Tx_1024QAM(message_bits);
 
 
 % figure(11);
@@ -40,7 +40,7 @@ s_tx = Tx_64QAM(message_bits);
 % title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
 % 
 %channel
-rxSig = awgn(s_tx,20,'measured');
+rxSig = awgn(s_tx,10,'measured');
 
 % add Frequency offset
 t = (0:length(rxSig)-1)/fs;  % Time vector
@@ -56,7 +56,7 @@ s_tx_phase_offset = s_tx_frequency_offset * exp(1i * phase_offset);
 
 % receiver
 
-[received_message_bits, received_message_symbols, ~]= Rx_64QAM(s_tx_phase_offset, segment_size./codeRate);
+[received_message_bits, received_message_symbols, ~]= Rx_1024QAM(s_tx_phase_offset, segment_size./codeRate);
 
 % convert the received_message_bits to strings
 received_message_string = bits2str(received_message_bits(:))

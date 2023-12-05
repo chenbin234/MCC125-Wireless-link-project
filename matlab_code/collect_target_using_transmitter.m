@@ -1,4 +1,8 @@
 clear all;close all;
+%% parameter used in UDP connection
+Local_port = 8844;
+Remote_host = "127.0.0.1";
+Remote_port = 8867;
 
 % generate random message
 Rb = 333*1e6;          % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
@@ -41,7 +45,14 @@ NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
 
 for i = 1:number_data 
-    % Bit to symbol mapping & spacing: -–––––––––––––––––––––––––––––––––––––––
+    
+    % send a UDP message to receiver to notify the coming of the ith
+    % message
+    clear u1;
+    u1 = udpport("LocalPort",Local_port);
+    write(u1,sprintf('%05d',i),"string",Remote_host,Remote_port);
+    disp(["Ready to send No.", num2str(i), " message"]);
+    clear u1;
 
     % concolutional encoding
     trellis = poly2trellis([5 4],[23 35 0; 0 5 13]);
@@ -49,6 +60,7 @@ for i = 1:number_data
     codeRate = 2/3;
     message_bits = convenc(random_bits(i,:),trellis);
 
+    % Bit to symbol mapping & spacing: -–––––––––––––––––––––––––––––––––––––––
     m = buffer(message_bits, bpsymb)';            % Group bits into bits per symbol
     m_idx = bi2de(m, 'left-msb')';              % Bits to symbol index
     target_symbol(i,:) = qammod(m_idx, M, UnitAveragePower=true);  % Look up symbols using the indices
@@ -73,7 +85,7 @@ for i = 1:number_data
       currentTime=currentTime+frame_time
     end
 
-    disp(['Send the No.',num2str(i), 'message 200 times successfully !']);
+    disp(["Send the No.",num2str(i), "message 200 times successfully !"]);
 
     % After the loop,release system resources associated with the transmitter object.
     release(tx);

@@ -1,11 +1,10 @@
-function tx_signal = Tx_64QAM(message_bits)
+function tx_signal = Tx_1024QAM(message_bits)
 % This function is to send message in 64QAM.
 % message_bits = message to be transmitted.
 % fc = carrier frequency
 
 % Input parameters -–––––––––––––––––––––––––––––––––––––––––––––––––––––––
 Rb = 333*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
-% fc = 2.4*1e9;            % Carrier frequency [Hz]
 
 M = 1024;               % Number of symbols in the constellation
 
