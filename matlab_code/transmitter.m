@@ -46,7 +46,7 @@ tx = comm.SDRuTransmitter(...
   
 currentTime = 0;
 for k=1:200 % a loop 
-  pause(3);
+%   pause(3);
   tx(s_tx') % transmitting the signal s_tx
   currentTime=currentTime+frame_time
 end
