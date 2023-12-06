@@ -1,5 +1,5 @@
 Local_port = 8844;
-Remote_host = "127.0.0.1";
+Remote_host = "192.168.10.100";
 Remote_port = 8867;
 
 % Creating a UDP object
