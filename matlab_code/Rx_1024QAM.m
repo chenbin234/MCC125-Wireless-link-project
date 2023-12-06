@@ -2,14 +2,14 @@ function [received_message_bits, received_message_symbols, MF_output_cut_without
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
-Rb = 333*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
-N=40000;              % Numbr of samples in a frame
+Rb = 1*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+N=20000;              % Numbr of samples in a frame
 
 M = 1024;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
-fs = 3*fsymb;        % Sampling frequency [Hz]
+fs = 10*fsymb;        % Sampling frequency [Hz]
 Tsamp = 1/fs;         % Sampling time
 fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 
@@ -25,10 +25,13 @@ received_signal = received_signal./max(abs(received_signal));  % normalise recei
 % [a,b]=butter(2,0.05);
 % received_signal=filtfilt(a,b,received_signal);
 
-preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
-preamble = repmat(preamble,1,10);
+%preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
+%preamble = repmat(preamble,1,10);
+
+preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	-1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1	-1	1	-1	1	1	1	1	-1	1	-1	-1	1	1	-1	1	1	1	1	1	1	-1	-1	1	-1	-1	-1	1	1	1	-1	-1	1	-1	-1	1	-1	1	1	1	-1	1	1	1	1	1	-1	-1	1	-1	-1	-1	-1	1	1	-1	-1	1	-1	1	1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1];
+
 %% 1. Coarse frequency correction
-dc_offset_value = 5;
+dc_offset_value = 10;
 received_signal_with_dc_offset = received_signal + dc_offset_value;
 
 [pxx, f] = pwelch(received_signal_with_dc_offset.',[],[],[],fs,'centered','power');
@@ -46,6 +49,8 @@ rx_freq_correction = received_signal.*exp(2*-1i*pi*(freq_shift_coarse)*(0:length
 
 % figure(4);
 % plot(pxx);
+
+
 %% 2. Detection of frame start
 [pulse,~] = rtrcpuls(alpha,tau,fs,span);      % Create rrc pulse: rtrcpuls(alpha,tau,fs,span)
 
@@ -62,7 +67,7 @@ corr = corr./length(preamble);                                      % normalize 
 % figure(3);plot(abs(corr));
 
 
-Threshold = 0.5;                                      % if corr has a peak over 0.8, there are messages in transmitter
+Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 Tx_hat = Tmax - length(conv_preamble_pulse);          % find delay, Tx_hat+1 is the location of the start(preamble) of the message
 length_signal = (fsfd*(length(preamble)+(segment_size./bpsymb))+length(pulse)-1); %length of preamble+message in y
@@ -85,7 +90,7 @@ elseif (Tx_hat + length_signal > N || Tx_hat < 0)
     
 else
     detect_preamble = 1;
-    figure(2);plot(abs(corr));
+    %figure(2);plot(abs(corr));
 
 %     figure(3);
 %     subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
@@ -150,8 +155,8 @@ else
     %rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
 %     raw_message_symbol = rx_vec;
 
-    scatterplot(rx_vec);
-    title('Downsampling');
+    %scatterplot(rx_vec);
+    %title('Downsampling');
 
 %% 5. Frequency and phase correction
 
@@ -222,8 +227,8 @@ else
     disp(['length of decoded message', num2str(length(received_message_bits))]);
     
     % Plot constellation diagram after Frequency and phase correction
-    scatterplot(received_message_symbols);
-    title('QAM Constellation Diagram after Frequency and phase correction');
+    %scatterplot(received_message_symbols);
+    %title('QAM Constellation Diagram after Frequency and phase correction');
 
 end
 end
