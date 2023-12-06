@@ -4,14 +4,14 @@ function tx_signal = Tx_1024QAM(message_bits)
 % fc = carrier frequency
 
 % Input parameters -–––––––––––––––––––––––––––––––––––––––––––––––––––––––
-Rb = 333*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 1*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 
 M = 1024;               % Number of symbols in the constellation
 
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
-fs = 3*fsymb;        % Sampling frequency [Hz]
+fs = 10*fsymb;        % Sampling frequency [Hz]
 Tsamp = 1/fs;         % Sampling time
 fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 
@@ -39,8 +39,11 @@ x = qammod(m_idx, M, UnitAveragePower=true);  % Look up symbols using the indice
 
 
 % Add preamble: -––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
-preamble = repmat(preamble,1,10);
+% preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
+% preamble = repmat(preamble,1,10);
+
+preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	-1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1	-1	1	-1	1	1	1	1	-1	1	-1	-1	1	1	-1	1	1	1	1	1	1	-1	-1	1	-1	-1	-1	1	1	1	-1	-1	1	-1	-1	1	-1	1	1	1	-1	1	1	1	1	1	-1	-1	1	-1	-1	-1	-1	1	1	-1	-1	1	-1	1	1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1];
+
 % pilot = zeros(1,100);
 % x = [pilot, preamb, x]; 
 % x = [preamb, x]; 
@@ -68,9 +71,9 @@ message_symbol = [preamble x];
 %     message_symbol = [message_symbol, symbol_segment_with_preamble];
 % end
 
-figure(12);
-scatterplot(message_symbol(length(preamble)+1:end));
-title('QAM Constellation Diagram transmitted signal');
+% figure(12);
+% scatterplot(message_symbol(length(preamble)+1:end));
+% title('QAM Constellation Diagram transmitted signal');
 
 x_upsample = upsample(message_symbol, fsfd);               % Space the symbols fsfd apart, to enable pulse shaping using conv.
 
