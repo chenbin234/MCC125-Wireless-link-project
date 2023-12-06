@@ -9,6 +9,10 @@ codeRate = 2/3;
 
 M = 1024;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
+
+% Specify the Excel file name
+feature_file = 'feature_symbol_dataset.csv';
+
 %% This is the sampling rate for the digital mixer, do not change
 MasterClock_Rate=100000000;
 
@@ -81,14 +85,15 @@ for i = 1:number_data
         end
     %     currentTime=currentTime+frame_time
     % release(rx);
+    
     end
     release(rx);
-
+    
+    if mod(i,50) == 0
+        writematrix(feature_symbol, feature_file);
+    end
 
 end
-
-% Specify the Excel file name
-feature_file = 'feature_symbol_dataset.csv';
 
 % Write the random numbers to the Excel file
 writematrix(feature_symbol, feature_file);

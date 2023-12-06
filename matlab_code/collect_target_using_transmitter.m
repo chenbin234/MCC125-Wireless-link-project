@@ -1,7 +1,7 @@
 clear all;close all;
 %% parameter used in UDP connection
 Local_port = 8844;
-Remote_host = "192.168.10.100";
+Remote_host = "127.0.0.1";
 Remote_port = 8867;
 
 % generate random message
@@ -23,6 +23,8 @@ random_bits = randi([0, 1], number_data, segmentation_size);
 % collect the target and feature for model training
 target_symbol = zeros(number_data,(segmentation_size./bpsymb)*1.5);
 
+% Specify the Excel file name
+target_file = 'target_symbol_dataset.csv';
 
 %% This is the sampling rate for the digital mixer, do not change
 MasterClock_Rate=100000000;
@@ -93,11 +95,14 @@ for i = 1:number_data
 
     disp('Sleep for 5 seconds!');
     pause(10);
-
+    
+    if mod(i,50) == 0
+        writematrix(target_symbol, target_file);
+    end
+        
 end
 
-% Specify the Excel file name
-target_file = 'target_symbol_dataset.csv';
+
 
 % Write the random numbers to the Excel file
 writematrix(target_symbol, target_file);
