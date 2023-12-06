@@ -32,7 +32,7 @@ message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segme
 disp(['The message transmitted :  ', bits2str(message_bits)])
 
 % transmitter
-s_tx = 0.1*Tx_64QAM(message_bits);
+s_tx = 0.5*Tx_64QAM(message_bits);
 
 %% Setup the Tx
 tx = comm.SDRuTransmitter(... 
