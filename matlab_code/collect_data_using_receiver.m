@@ -55,7 +55,7 @@ for i = 1:number_data
     
     % UDP connection, waiting a message from transmitter
     clear u2;
-    u2 = udpport("LocalPort",Local_port, Timeout=30);
+    u2 = udpport("LocalPort",Local_port, Timeout=40);
     notification_message = read(u2,5,"string");
     disp(["Got the notification,  N0.", notification_message, " message is coming!"]);
     clear u2
@@ -70,7 +70,14 @@ for i = 1:number_data
       %% Start the Rx
         [rx_data] = rx();
         rx_data=double(rx_data)/(2^16);
-    
+        
+        % check if the rx-data contains NaN values
+        isNanpresent = any(isnan(rx_data));
+        
+        if isNanpresent
+            break;
+        end
+        
         [received_message_bits, received_message_symbols, feature_symbols, detect_preamble]= Rx_1024QAM(rx_data', segmentation_size./codeRate);
         
         if detect_preamble == 1

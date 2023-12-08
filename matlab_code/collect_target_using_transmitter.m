@@ -93,7 +93,7 @@ for i = 1:number_data
     % After the loop,release system resources associated with the transmitter object.
     release(tx);
 
-    disp('Sleep for 5 seconds!');
+    disp('Sleep for 10 seconds!');
     pause(10);
     
     if mod(i,50) == 0
