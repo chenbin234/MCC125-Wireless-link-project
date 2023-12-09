@@ -29,9 +29,14 @@ received_signal = received_signal./max(abs(received_signal));  % normalise recei
 % preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
 % preamble = repmat(preamble,1,10);
 
-preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	-1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1	-1	1	-1	1	1	1	1	-1	1	-1	-1	1	1	-1	1	1	1	1	1	1	-1	-1	1	-1	-1	-1	1	1	1	-1	-1	1	-1	-1	1	-1	1	1	1	-1	1	1	1	1	1	-1	-1	1	-1	-1	-1	-1	1	1	-1	-1	1	-1	1	1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1];
+preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 -1 -1 -1 -1 1 -1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	1 -1 -1 1 1 1 -1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1	-1	1	-1	1	1	1	1	-1	1	-1	-1	1	1	-1	1	1	1	1	1	1	-1	-1	1	-1	-1	-1	1	1	1	-1	-1	1	-1	-1	1	-1	1	1	1	-1	1	1	1	1	1	-1	-1	1	-1	-1	-1	-1	1	1	-1	-1	1	-1	1	1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1];
 %% 1. Coarse frequency correction
-dc_offset_value = 5;
+
+% dc_offset_real = 10;  % Real part of the DC offset
+% dc_offset_imag = 10;  % Imaginary part of the DC offset
+% received_signal_with_dc_offset = received_signal + (dc_offset_real + 1i * dc_offset_imag);
+
+dc_offset_value = 10;
 received_signal_with_dc_offset = received_signal + dc_offset_value;
 
 [pxx, f] = pwelch(received_signal_with_dc_offset.',[],[],[],fs,'centered','power');
@@ -41,6 +46,7 @@ disp(['The estimated coarse frequency offset is',num2str(freq_shift_coarse)])
 % first coarse frequency correction
 rx_freq_correction = received_signal.*exp(2*-1i*pi*(freq_shift_coarse)*(0:length(received_signal)-1)*1/fs); 
 % disp('Coarse frequency correction done!')
+
 % figure(2);
 % subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
 % title('Power spetrum of received signal (raw)'); 
@@ -62,7 +68,8 @@ corr = conv(rx_freq_correction,fliplr(conv_preamble_pulse));% correlate the reco
 % disp('correlate the recorded signal with conv_preamble_pulse')
 
 corr = corr./length(preamble);                                      % normalize corr 
-% figure(3);plot(abs(corr));
+
+figure(3);plot(abs(corr));
 
 
 Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
@@ -85,12 +92,16 @@ elseif (Tx_hat + length_signal > N || Tx_hat < 0)
     raw_message_symbol = 0;
     
 else
-    figure(2);plot(abs(corr));
+    figure(2);
+    plot(abs(corr));
+    title('Preamble detected'); 
 
     figure(3);
-    subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
+    subplot(3,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
     title('Power spetrum of received signal (raw)'); 
-    subplot(2,1,2), pwelch(rx_freq_correction,[],[],[],fs,'centered','power');
+    subplot(3,1,2), pwelch(received_signal_with_dc_offset,[],[],[],fs,'centered','power');
+    title('Power spetrum of received signal (add DC offset)'); 
+    subplot(3,1,3), pwelch(rx_freq_correction,[],[],[],fs,'centered','power');
     title('Power spetrum of received signal (after coarse frequency correction)');
 
 

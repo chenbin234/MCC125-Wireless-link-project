@@ -34,26 +34,18 @@ message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segme
 % transmitter
 s_tx = Tx_64QAM(message_bits);
 
-
-% figure(11);
-% subplot(2,1,1), pwelch(s_tx,[],[],[],fs,'centered','power');
-% title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
-% 
 %channel
 rxSig = awgn(s_tx,20,'measured');
 
 % add Frequency offset
 t = (0:length(rxSig)-1)/fs;  % Time vector
-frequency_offset = 100;  % Adjust as needed
+frequency_offset = 10;  % Adjust as needed
 s_tx_frequency_offset = rxSig.* exp(1i * 2 * pi * frequency_offset * t);
 
 % add Phase offset
 phase_offset = -pi/8;  % Adjust as needed
 s_tx_phase_offset = s_tx_frequency_offset * exp(1i * phase_offset);
  
-% subplot(2,1,2), pwelch(s_tx_frequency_offset,[],[],[],fs,'centered','power');
-% title('Power spetrum of Transmitted Signal after Noise'); 
-
 % receiver
 
 [received_message_bits, received_message_symbols, ~]= Rx_64QAM(s_tx_phase_offset, segment_size./codeRate);
