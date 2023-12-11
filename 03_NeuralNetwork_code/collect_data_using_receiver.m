@@ -75,7 +75,7 @@ for i = 1:number_data
         isNanpresent = any(isnan(rx_data));
         
         if isNanpresent
-            break;
+            continue;
         end
         
         [received_message_bits, received_message_symbols, feature_symbols, detect_preamble]= Rx_1024QAM(rx_data', segmentation_size./codeRate);
