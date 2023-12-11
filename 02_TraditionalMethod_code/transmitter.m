@@ -6,7 +6,7 @@ clear all;close all;
 MasterClock_Rate=100000000;
 
 %% Interpolation factor for the Transmitter
-Interp_Factor=10;
+Interp_Factor=4;
 
 %% Decimation factor for the Receiver
 Decimation_Factor=Interp_Factor;
@@ -21,7 +21,7 @@ time=(0:dt:dt*(N-1))';
 RBW=1/frame_time;
 NFFT = 2^nextpow2(N); % Next power of 2 from length of y
 
-segment_size =10*960;  % Number of bits in each message segmentation
+segment_size =960;  % Number of bits in each message segmentation
 random_number = 0; % choose to send different messages
 %% call the Tx_64QAM function
 message_lines = readlines("message.txt");
@@ -32,23 +32,23 @@ message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segme
 disp(['The message transmitted :  ', bits2str(message_bits)])
 
 % transmitter
-s_tx = 0.5*Tx_64QAM(message_bits);
-
+s_tx = 0.2*Tx_64QAM(message_bits);
+%subplot(1,1,1), pwelch(tx_signal,[],[],[],fs,'centered','power');
 %% Setup the Tx
 tx = comm.SDRuTransmitter(... 
 'Platform','N200/N210/USRP2',...
 'IPAddress','192.168.10.8',...
-'CenterFrequency',10e6,...
+'CenterFrequency',20e6,...
 'EnableBurstMode',0,...
 'InterpolationFactor',Interp_Factor,...
 'MasterClockRate',MasterClock_Rate,...
 'TransportDataType','int16');
   
 currentTime = 0;
-for k=1:200 % a loop 
+for k=1:1000000 % a loop 
 %   pause(3);
   tx(s_tx') % transmitting the signal s_tx
-  currentTime=currentTime+frame_time
+  currentTime=currentTime+frame_time;
 end
 % After the loop,release system resources associated with the transmitter object.
 release(tx);

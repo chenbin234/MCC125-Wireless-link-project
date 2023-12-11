@@ -2,11 +2,11 @@ function [received_message_bits, received_message_symbols, raw_message_symbol]= 
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
-Rb = 10*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 0.1*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;         % Carrier frequency [Hz]
 N=40000;              % Numbr of samples in a frame
 
-M = 256;               % Number of symbols in the constellation
+M = 16;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
@@ -19,6 +19,7 @@ tau = 1/fsymb;        % Nyquist period or symbol time
 span = 6;             % Pulse width (symbol times of pulse)
 % segment_size = 3000;  % Number of bits in each message segmentation
 
+%received_signal = lowpass(received_signal,25e6);
 
 received_signal = received_signal./max(abs(received_signal));  % normalise received_signal
 
@@ -36,10 +37,10 @@ preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 
 % dc_offset_imag = 10;  % Imaginary part of the DC offset
 % received_signal_with_dc_offset = received_signal + (dc_offset_real + 1i * dc_offset_imag);
 
-dc_offset_value = 10;
-received_signal_with_dc_offset = received_signal + dc_offset_value;
+% dc_offset_value = 10;
+% received_signal_with_dc_offset = received_signal + dc_offset_value;
 
-[pxx, f] = pwelch(received_signal_with_dc_offset.',[],[],[],fs,'centered','power');
+[pxx, f] = pwelch(received_signal.',[],[],[],fs,'centered','power');
 index = find(pxx == max(pxx));
 freq_shift_coarse = f(index);
 disp(['The estimated coarse frequency offset is',num2str(freq_shift_coarse)])
@@ -72,7 +73,7 @@ corr = corr./length(preamble);                                      % normalize 
 figure(3);plot(abs(corr));
 
 
-Threshold = 0.8;                                      % if corr has a peak over 0.8, there are messages in transmitter
+Threshold = 0.05;                                      % if corr has a peak over 0.8, there are messages in transmitter
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 Tx_hat = Tmax - length(conv_preamble_pulse);          % find delay, Tx_hat+1 is the location of the start(preamble) of the message
 length_signal = (fsfd*(length(preamble)+(segment_size./bpsymb))+length(pulse)-1); %length of preamble+message in y
@@ -80,7 +81,7 @@ length_signal = (fsfd*(length(preamble)+(segment_size./bpsymb))+length(pulse)-1)
 
 if (tmp < Threshold)
     disp('find nothing !')
-    figure(2);plot(abs(corr));
+    %figure(2);plot(abs(corr));
     received_message_bits = 0;
     received_message_symbols=0;
     raw_message_symbol = 0;
@@ -96,12 +97,10 @@ else
     plot(abs(corr));
     title('Preamble detected'); 
 
-    figure(3);
-    subplot(3,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
+    figure(4);
+    subplot(2,1,1), pwelch(received_signal,[],[],[],fs,'centered','power');
     title('Power spetrum of received signal (raw)'); 
-    subplot(3,1,2), pwelch(received_signal_with_dc_offset,[],[],[],fs,'centered','power');
-    title('Power spetrum of received signal (add DC offset)'); 
-    subplot(3,1,3), pwelch(rx_freq_correction,[],[],[],fs,'centered','power');
+    subplot(2,1,2), pwelch(rx_freq_correction,[],[],[],fs,'centered','power');
     title('Power spetrum of received signal (after coarse frequency correction)');
 
 
@@ -155,7 +154,10 @@ else
     
     rx_preamble_message = MF_output_cut(k:fsfd:end);      % dowmsampling, get the preamble+message
     rx_vec = rx_preamble_message(1+length(preamble):end); % get the message
-      
+    
+    rx_vec = rx_vec - mean(rx_vec);
+    rx_preamble_message = rx_preamble_message - mean(rx_preamble_message);
+    
     %MF_output_downsample = downsample(MF_output(:), fsfd);
     %rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
     raw_message_symbol = rx_vec;

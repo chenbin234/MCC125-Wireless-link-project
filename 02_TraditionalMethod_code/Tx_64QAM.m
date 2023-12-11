@@ -4,10 +4,10 @@ function tx_signal = Tx_64QAM(message_bits)
 % fc = carrier frequency
 
 % Input parameters -–––––––––––––––––––––––––––––––––––––––––––––––––––––––
-Rb = 10*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 0.1*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 fc = 2.4*1e9;            % Carrier frequency [Hz]
 
-M = 256;               % Number of symbols in the constellation
+M = 16;               % Number of symbols in the constellation
 
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
@@ -87,5 +87,12 @@ tx_signal = conv(pulse,x_upsample);           % Create baseband signal (convolve
 % tx_signal = real(tx_signal);                  % Send real part, information is in amplitude and phase
 tx_signal = tx_signal/max(abs(tx_signal));    % Limit the max amplitude to 1 to prevent clipping of waveforms
 disp(['the length of transmitter signal is ',num2str(length(tx_signal))])
+
+
+dc_offset_value = 2;
+tx_signal = [tx_signal ,0.5*dc_offset_value*ones(1,1000)];
+figure(10);
+subplot(1,1,1), pwelch(tx_signal,[],[],[],fs,'centered','power');
+title('Power spetrum of transmitted signal'); 
 
 end
