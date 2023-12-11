@@ -1,4 +1,4 @@
-function [received_message_bits, received_message_symbols, MF_output_cut_without_premable, detect_preamble]= Rx_1024QAM(received_signal, segment_size)
+function [received_message_bits, received_message_symbols, MF_output_cut, detect_preamble]= Rx_1024QAM(received_signal, segment_size)
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
@@ -78,14 +78,14 @@ if (tmp < Threshold)
 %     figure(2);plot(abs(corr));
     received_message_bits = 0;
     received_message_symbols=0;
-    MF_output_cut_without_premable = 0;
+    MF_output_cut = 0;
     detect_preamble = 0;
 
 elseif (Tx_hat + length_signal > N || Tx_hat < 0)
     disp('find the preamble, but the message is invalid (truncated), try to detect other valid frames.')
     received_message_bits = 0;
     received_message_symbols=0;
-    MF_output_cut_without_premable = 0;
+    MF_output_cut = 0;
     detect_preamble = 0;
     
 else
