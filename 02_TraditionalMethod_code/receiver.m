@@ -42,6 +42,7 @@ for k=1:1000 % a loop
   %% Start the Rx
     [rx_data] = rx();
     rx_data=double(rx_data)/(2^16);
+    % rx_data = conj(rx_data);
 
     [received_message_bits, received_message_symbols, ~]= Rx_64QAM(rx_data', segment_size./codeRate);
     
