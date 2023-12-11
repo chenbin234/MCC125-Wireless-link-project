@@ -56,10 +56,11 @@ s_tx_phase_offset = s_tx_frequency_offset * exp(1i * phase_offset);
 
 % receiver
 
-[received_message_bits, received_message_symbols, ~]= Rx_1024QAM(s_tx_phase_offset, segment_size./codeRate);
+% [received_message_bits, received_message_symbols, ~]= Rx_1024QAM(s_tx_phase_offset, segment_size./codeRate);
+[received_message_bits, received_message_symbols, ~, ~]= Rx_1024QAM_neural_network(s_tx_phase_offset, segment_size./codeRate);
 
 % convert the received_message_bits to strings
-received_message_string = bits2str(received_message_bits(:))
+% received_message_string = bits2str(received_message_bits(:))
 
 
 % Calculate the number of bit errors

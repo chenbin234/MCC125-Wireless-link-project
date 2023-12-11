@@ -1,4 +1,4 @@
-function [received_message_bits, received_message_symbols, MF_output_cut_without_premable, detect_preamble]= Rx_1024QAM_neural_network(received_signal, segment_size)
+function [received_message_bits, decoding_symbol, MF_output_cut_without_premable, detect_preamble]= Rx_1024QAM_neural_network(received_signal, segment_size)
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
@@ -91,6 +91,8 @@ elseif (Tx_hat + length_signal > N || Tx_hat < 0)
     raw_message_symbol = 0;
     
 else
+    detect_preamble = 1;
+    
     figure(2);
     plot(abs(corr));
     title('Preamble detected'); 
@@ -142,8 +144,8 @@ else
     % call the python function, and convert it back to matlab double format
     % pyenv(Version="/opt/homebrew/bin/python3.10") % change python version
     % used
-    input_vector = py.numpy.array(MF_output_cut);
-    decoding_symbol = py.decoding_symbol.decoding_received_symbols(input_vector);
+    input_vector = py.numpy.array(MF_output_cut_without_premable);
+    decoding_symbol = py.decoding_symbol.decoding_symbol(input_vector);
 
     decoding_symbol = double(decoding_symbol);
   
@@ -161,8 +163,8 @@ else
     disp(['length of decoded message', num2str(length(received_message_bits))]);
     
     % Plot constellation diagram after Frequency and phase correction
-    scatterplot(received_message_symbols);
-    title('QAM Constellation Diagram after Frequency and phase correction');
+    scatterplot(decoding_symbol);
+    title('QAM Constellation Diagram Decoding by NeuralNetwork');
 
 end
 end

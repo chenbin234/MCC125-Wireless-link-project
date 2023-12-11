@@ -10,8 +10,6 @@ pyenv(Version="/opt/homebrew/bin/python3.10")
 
 pe = pyenv;
 
-
-
 if isempty(pe.Version)
     disp "Python not installed"
 end
