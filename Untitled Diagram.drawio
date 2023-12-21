@@ -1,9 +1,24 @@
-<mxfile host="app.diagrams.net" modified="2023-12-21T08:39:54.181Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36" version="22.1.11" etag="zrnIRuq9zmX9VlJuZLHx" type="github">
+<mxfile host="app.diagrams.net" modified="2023-12-21T09:08:27.089Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36" etag="Lmkl0Kj8bFVT6lQ5QJ7t" version="22.1.11" type="github">
   <diagram name="Page-1" id="gv2XXGUPY00xqv7m-K2-">
-    <mxGraphModel>
+    <mxGraphModel dx="1050" dy="693" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="AaFce5voz4AovUXJyXVV-1" value="Transmitter&lt;br&gt;(USRP)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="197" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="AaFce5voz4AovUXJyXVV-2" value="Receiver&lt;br style=&quot;border-color: var(--border-color); font-size: 15px;&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;(USRP)&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="510" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="AaFce5voz4AovUXJyXVV-5" value="for i = 1: 30000&lt;br&gt;&lt;br style=&quot;border-color: var(--border-color); font-size: 15px;&quot;&gt;&lt;span style=&quot;white-space: pre; font-size: 15px;&quot;&gt;&#x9;&lt;/span&gt;UDP connection&lt;br style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;white-space: pre; font-size: 15px;&quot;&gt;&#x9;&lt;/span&gt;&lt;br style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;white-space: pre; font-size: 15px;&quot;&gt;&#x9;&lt;/span&gt;tx = comm.SDRuTransmitter(...);&lt;br style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;white-space: pre; font-size: 15px;&quot;&gt;&#x9;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;for k =1:500&lt;br style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;white-space: pre; font-size: 15px;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre; font-size: 15px;&quot;&gt;&#x9;&lt;/span&gt;tx(s_tx&#39;)&lt;br style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;white-space: pre; font-size: 15px;&quot;&gt;&#x9;&lt;/span&gt;end&lt;br style=&quot;font-size: 15px;&quot;&gt;&lt;span style=&quot;white-space: pre; font-size: 15px;&quot;&gt;&#x9;&lt;/span&gt;pause(10);&lt;br style=&quot;font-size: 15px;&quot;&gt;end" style="rounded=0;whiteSpace=wrap;html=1;align=left;horizontal=1;verticalAlign=top;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="127" y="184.47" width="260" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="AaFce5voz4AovUXJyXVV-6" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;for i = 1: 30000&lt;br&gt;&lt;br&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;rx = comm.SDRuReceiver(...);&lt;br&gt;&lt;br&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;UDP connection (&lt;font color=&quot;#ff0000&quot;&gt;Timeout=40&lt;/font&gt;)&lt;br&gt;&lt;br&gt;&lt;span style=&quot;border-color: var(--border-color); font-size: 15px;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;for k =1:1000&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;rx_data;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;...&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;span style=&quot;white-space: pre;&quot;&gt;&#x9;&lt;/span&gt;end&lt;/span&gt;&lt;/span&gt;&lt;/font&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;br style=&quot;border-color: var(--border-color); font-size: 15px;&quot;&gt;end&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;horizontal=1;verticalAlign=top;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="450" y="184.47" width="240" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="AaFce5voz4AovUXJyXVV-9" value="&lt;font color=&quot;#ff0000&quot;&gt;UDP connectiom&lt;/font&gt;" style="html=1;shadow=0;dashed=0;align=center;verticalAlign=middle;shape=mxgraph.arrows2.jumpInArrow;dy=15;dx=38;arrowHead=55;rotation=45;" vertex="1" parent="1">
+          <mxGeometry x="308.3" y="179.7" width="164.11" height="131.05" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
