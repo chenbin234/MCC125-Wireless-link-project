@@ -7,7 +7,7 @@ This is a course project,we need to demonstrate a simplex transmission of data (
 
 ### 2.1 Transmitter
 
-![transmitter](00_SystemDesign/Transmitter.jpg)
+<img src="00_SystemDesign/Transmitter.jpg" alt="transmitter" style="zoom: 67%;" />
 
 ### 2.2 Receiver
 
@@ -43,7 +43,7 @@ This is a course project,we need to demonstrate a simplex transmission of data (
 
 #### 3.2.5 Choose transformer architecture
 
-<img src="images/transformer%20(2).png" alt="transformer (2)" style="zoom:33%;" />
+<img src="images/transformer%20(2).png" alt="transformer (2)" style="zoom: 50%;" />
 
 ## 4 Result
 
