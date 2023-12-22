@@ -1,4 +1,4 @@
-function [received_message_bits, received_message_symbols, raw_message_symbol]= Rx_64QAM(received_signal, segment_size)
+function [received_message_bits, received_message_symbols, raw_message_symbol]= Rx_64QAM_debug(received_signal, segment_size)
 % This function is to decode the received signal.
 
 %% ###### Basic parameter ######
@@ -6,7 +6,7 @@ Rb = 0.1*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit
 fc = 2.4*1e9;         % Carrier frequency [Hz]
 N=50000;              % Numbr of samples in a frame
 
-M = 4;               % Number of symbols in the constellation
+M = 16;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
@@ -73,7 +73,7 @@ corr = corr./length(preamble);                                      % normalize 
 figure(3);plot(abs(corr));
 
 
-Threshold = 0.05;                                      % if corr has a peak over 0.8, there are messages in transmitter
+Threshold = 0.2;                                      % if corr has a peak over 0.8, there are messages in transmitter
 [tmp,Tmax] = max(abs(corr));                          % value and location of the peak of corr
 Tx_hat = Tmax - length(conv_preamble_pulse);          % find delay, Tx_hat+1 is the location of the start(preamble) of the message
 length_signal = (fsfd*(length(preamble)+(segment_size./bpsymb))+length(pulse)-1); %length of preamble+message in y
@@ -155,8 +155,8 @@ else
     rx_preamble_message = MF_output_cut(k:fsfd:end);      % dowmsampling, get the preamble+message
     rx_vec = rx_preamble_message(1+length(preamble):end); % get the message
     
-    % rx_vec = rx_vec - mean(rx_vec);
-    % rx_preamble_message = rx_preamble_message - mean(rx_preamble_message);
+    rx_vec = rx_vec - mean(rx_vec);
+    rx_preamble_message = rx_preamble_message - mean(rx_preamble_message);
     
     %MF_output_downsample = downsample(MF_output(:), fsfd);
     %rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
@@ -165,37 +165,62 @@ else
     scatterplot(rx_vec);
     title('Downsampling');
 
+
+    
+
 %% 5. Frequency and phase correction
 
     % Phase synchronization & Frequency synchronization
     rx_preamble = rx_preamble_message(1:length(preamble));% extract the recieved preamble symbols
-    rx_preamble = rx_preamble./max(abs(rx_preamble));    % normalize the preamle symbols 
+    rx_preamble_for_freq_sync = rx_preamble./max(abs(rx_preamble));    % normalize the preamle symbols 
+    rx_signal_downsampled = rx_preamble_message;
+
+    % Calculate phase difference between transmitted preamble and received preamble
+    diff_angle_preamble=unwrap(angle(preamble)-angle(rx_preamble_for_freq_sync));
+    
+    % Find coefficients to polyfit line
+    c = polyfit(1:length(diff_angle_preamble),diff_angle_preamble,1);
+    % Find coefficients to polyfit line
+    polyfit_line = polyval(c,1:length(diff_angle_preamble));
+    
+    % Frequency offset is the slope of the fitted line
+    freq_grad=(polyfit_line(1)-polyfit_line(end))/length(polyfit_line);
+    
+    % Calculate frequency shift
+    freq_shifts=freq_grad*(1:length(rx_signal_downsampled));
+    
+    % Correct for frequency shift
+    rx_preamble_message_freq=rx_signal_downsampled.*exp(-1i*freq_shifts);
+
         
-    phase_slope = unwrap(angle(rx_preamble) - angle(preamble)); % calculated the difference in angle between known preamble and received preamble  
+    % phase_slope = unwrap(angle(rx_preamble) - angle(preamble)); % calculated the difference in angle between known preamble and received preamble  
+    % 
+    % % unwrap(angle(rx_preamble) - angle(preamble)) = phase_offset + 2*pi*frequency_offset 
+    % % polyfit(x,phase), the intercept is phase offset, the slope is 2*pi*frequency_offset
+    % % we can got the phase offset and frequency_offset
+    % 
+    % time_symb_synk = (0:length(preamble)-1)*Tsymb;
+    % p1 = polyfit(time_symb_synk,phase_slope,1);
+    % phase_slope_fit = polyval(p1,time_symb_synk);
+    % 
+    % %freq_offset_estimated=p1(1)/(2*pi);% In Hz
+    % %phase_offset_estimated_deg=360*(p(2))/(2*pi);
+    % freq_offset_estimated = (phase_slope_fit(1)-phase_slope_fit(end))/length(phase_slope_fit);
+    % freq_offset_estimated = freq_offset_estimated * (1: length(rx_preamble_message));
+    % 
+    % 
+    % disp(['Frequency offset estimated: ',num2str(freq_offset_estimated), 'Hz'])
+    % %disp(['Phase offset estimated: ',num2str(phase_offset_estimated_deg), 'degree'])
+    % 
+    % 
+    % % Frequency correction after down-sampling
+    % time_ds = (0:length(rx_preamble_message)-1)*Tsymb;
+    % % rx_preamble_message_freq=rx_preamble_message.* exp(-1i * 2 * pi * freq_offset_estimated * time_ds);% Correcting freq offset
+    % rx_preamble_message_freq=rx_preamble_message.* exp(-1i * freq_offset_estimated);
+    % disp('Frequency correction done!')
 
-    % unwrap(angle(rx_preamble) - angle(preamble)) = phase_offset + 2*pi*frequency_offset 
-    % polyfit(x,phase), the intercept is phase offset, the slope is 2*pi*frequency_offset
-    % we can got the phase offset and frequency_offset
-    
+
     time_symb_synk = (0:length(preamble)-1)*Tsymb;
-    p1 = polyfit(time_symb_synk,phase_slope,1);
-    % phase_slope_fit = polyval(p,time_symb_synk);
-
-    freq_offset_estimated=p1(1)/(2*pi);% In Hz
-    % freq_offset_estimated = 100;
-    %phase_offset_estimated_deg=360*(p(2))/(2*pi);
-    
-    disp(['Frequency offset estimated: ',num2str(freq_offset_estimated), 'Hz'])
-    %disp(['Phase offset estimated: ',num2str(phase_offset_estimated_deg), 'degree'])
-
-
-    % Frequency correction after down-sampling
-    time_ds = (0:length(rx_preamble_message)-1)*Tsymb;
-    rx_preamble_message_freq=rx_preamble_message.* exp(-1i * 2 * pi * freq_offset_estimated * time_ds);% Correcting freq offset
-    disp('Frequency correction done!')
-
-
-
     phase_slope2 = unwrap(angle(rx_preamble_message_freq(1:length(preamble))) - angle(preamble));
     p2 = polyfit(time_symb_synk,phase_slope2,1);
 

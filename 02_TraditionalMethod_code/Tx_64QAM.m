@@ -90,7 +90,7 @@ disp(['the length of transmitter signal is ',num2str(length(tx_signal))])
 
 
 dc_offset_value = 2;
-tx_signal = [tx_signal ,0.5*dc_offset_value*ones(1,1000)];
+tx_signal = [tx_signal ,0.5*dc_offset_value*ones(1,30000)];
 figure(10);
 subplot(1,1,1), pwelch(tx_signal,[],[],[],fs,'centered','power');
 title('Power spetrum of transmitted signal'); 

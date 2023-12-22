@@ -4,7 +4,7 @@ Rb = 1*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit
 % N = length(message_bits);% Number of bits to transmit
 fc = 2.4*1e9;            % Carrier frequency [Hz]
 
-M = 64;               % Number of symbols in the constellation
+M = 16;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
@@ -16,7 +16,7 @@ alpha = 0.8;          % Roll off factor / Excess bandwidth factor (a_RC=0.35;a_R
 tau = 1/fsymb;        % Nyquist period or symbol time 
 span = 6;             % Pulse width (symbol times of pulse)
 
-segment_size = 960;  % Number of bits in each message segmentation
+segment_size = 4*960;  % Number of bits in each message segmentation
 random_number = 0; % choose to send different messages
 
 
@@ -35,11 +35,11 @@ message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segme
 s_tx = Tx_64QAM(message_bits);
 
 %channel
-rxSig = awgn(s_tx,20,'measured');
+rxSig = awgn(s_tx,15,'measured');
 
 % add Frequency offset
 t = (0:length(rxSig)-1)/fs;  % Time vector
-frequency_offset = 10;  % Adjust as needed
+frequency_offset = -5;  % Adjust as needed
 s_tx_frequency_offset = rxSig.* exp(1i * 2 * pi * frequency_offset * t);
 
 % add Phase offset
