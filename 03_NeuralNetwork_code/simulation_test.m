@@ -1,6 +1,6 @@
 clear all;clc;
 % Input parameters -–––––––––––––––––––––––––––––––––––––––––––––––––––––––
-Rb = 333*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
+Rb = 1*1e6;             % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
 % N = length(message_bits);% Number of bits to transmit
 fc = 2.4*1e9;            % Carrier frequency [Hz]
 
@@ -8,7 +8,7 @@ M = 1024;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
-fs = 10*fsymb;        % Sampling frequency [Hz]
+fs = 5*fsymb;        % Sampling frequency [Hz]
 Tsamp = 1/fs;         % Sampling time
 fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 
@@ -29,6 +29,7 @@ message_lines = readlines("message.txt");
 message_string = strjoin(message_lines, ' '); % Combine the lines into a single string
 message_bits = str2bits(message_string);
 message_bits = message_bits(random_number*segment_size+1:(1+random_number)*segment_size);
+% message_bits = [1	1	0	0	1	1	0	0	0	1	1	1	1	0	1	1	0	0	0	1	0	0	0	1	1	1	1	1	0	1	0	1	1	0	0	1	0	1	1	0	1	1	1	0	1	1	1	1	1	0	1	0	0	0	1	1	0	1	1	1	0	1	0	1	0	0	0	1	0	1	0	0	0	1	1	1	0	1	0	0	1	0	1	1	0	0	0	0	0	0	0	1	1	0	1	1	0	1	1	1];
 % message_bits = randi([0, 1], 1, segment_size);
 
 % transmitter
@@ -40,11 +41,11 @@ s_tx = Tx_1024QAM(message_bits);
 % title('Power spetrum of Transmitted Signal after Pulse Shaping'); 
 % 
 %channel
-rxSig = awgn(s_tx,10,'measured');
+rxSig = awgn(s_tx,30,'measured');
 
 % add Frequency offset
 t = (0:length(rxSig)-1)/fs;  % Time vector
-frequency_offset = 100;  % Adjust as needed
+frequency_offset = 1;  % Adjust as needed
 s_tx_frequency_offset = rxSig.* exp(1i * 2 * pi * frequency_offset * t);
 
 % add Phase offset

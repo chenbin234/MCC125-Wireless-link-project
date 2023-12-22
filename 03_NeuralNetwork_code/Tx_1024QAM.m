@@ -11,7 +11,7 @@ M = 1024;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
-fs = 10*fsymb;        % Sampling frequency [Hz]
+fs = 5*fsymb;        % Sampling frequency [Hz]
 Tsamp = 1/fs;         % Sampling time
 fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 
@@ -42,8 +42,8 @@ x = qammod(m_idx, M, UnitAveragePower=true);  % Look up symbols using the indice
 % preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
 % preamble = repmat(preamble,1,10);
 
-preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 -1 -1 -1 -1 1 -1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	1 -1 -1 1 1 1 -1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1	-1	1	-1	1	1	1	1	-1	1	-1	-1	1	1	-1	1	1	1	1	1	1	-1	-1	1	-1	-1	-1	1	1	1	-1	-1	1	-1	-1	1	-1	1	1	1	-1	1	1	1	1	1	-1	-1	1	-1	-1	-1	-1	1	1	-1	-1	1	-1	1	1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1];
-
+% preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 -1 -1 -1 -1 1 -1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	1 -1 -1 1 1 1 -1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1	-1	1	-1	1	1	1	1	-1	1	-1	-1	1	1	-1	1	1	1	1	1	1	-1	-1	1	-1	-1	-1	1	1	1	-1	-1	1	-1	-1	1	-1	1	1	1	-1	1	1	1	1	1	-1	-1	1	-1	-1	-1	-1	1	1	-1	-1	1	-1	1	1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1];
+preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 -1 -1 -1 -1 1 -1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	1 -1 -1 1 1 1 -1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1];
 % pilot = zeros(1,100);
 % x = [pilot, preamb, x]; 
 % x = [preamb, x]; 

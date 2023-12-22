@@ -53,7 +53,7 @@ for i = 1:number_data
         'MasterClockRate',MasterClock_Rate,...
         'TransportDataType','int16');
     
-    % UDP connection, waiting a message from transmitter
+    % UDP connection, waiting a notification from transmitter
     clear u2;
     u2 = udpport("LocalPort",Local_port, Timeout=40);
     notification_message = read(u2,5,"string");

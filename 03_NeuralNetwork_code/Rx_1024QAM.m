@@ -3,13 +3,13 @@ function [received_message_bits, received_message_symbols, MF_output_cut, detect
 
 %% ###### Basic parameter ######
 Rb = 1*1e6;           % Bit rate [bit/sec] %Rb = fsymb*bpsymb; % Bit rate [bit/s]
-N=20000;              % Numbr of samples in a frame
+N=40000;              % Numbr of samples in a frame
 
 M = 1024;               % Number of symbols in the constellation
 bpsymb = log2(M);     % Number of bits per symbol,bpsymb=6 in 64QAM 
 fsymb = Rb/bpsymb;    % Symbol rate [symb/s] Rs = 1.67 MBaud/s
 Tsymb = 1/fsymb;      % Symbol time
-fs = 10*fsymb;        % Sampling frequency [Hz]
+fs = 5*fsymb;        % Sampling frequency [Hz]
 Tsamp = 1/fs;         % Sampling time
 fsfd = fs/fsymb;      % Number of samples per symbol [samples/symb], fsfd=10
 
@@ -28,7 +28,9 @@ received_signal = received_signal./max(abs(received_signal));  % normalise recei
 %preamble = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];     % 13 bits from Barker code
 %preamble = repmat(preamble,1,10);
 
-preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 -1 -1 -1 -1 1 -1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	1 -1 -1 1 1 1 -1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1	-1	1	-1	1	1	1	1	-1	1	-1	-1	1	1	-1	1	1	1	1	1	1	-1	-1	1	-1	-1	-1	1	1	1	-1	-1	1	-1	-1	1	-1	1	1	1	-1	1	1	1	1	1	-1	-1	1	-1	-1	-1	-1	1	1	-1	-1	1	-1	1	1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1];
+% preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 -1 -1 -1 -1 1 -1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	1 -1 -1 1 1 1 -1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1	-1	1	-1	1	1	1	1	-1	1	-1	-1	1	1	-1	1	1	1	1	1	1	-1	-1	1	-1	-1	-1	1	1	1	-1	-1	1	-1	-1	1	-1	1	1	1	-1	1	1	1	1	1	-1	-1	1	-1	-1	-1	-1	1	1	-1	-1	1	-1	1	1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1];
+% preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 -1 -1 -1 -1 1 -1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	1 -1 -1 1 1 1 -1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1];
+preamble = [-1	-1	-1	-1	1	-1	-1	-1	-1	-1	-1	1	-1	-1	1	1	-1	-1 1 1 1 -1 -1 1 1 1 -1 -1 -1 -1 1 -1	-1	-1	1	-1	1	1	-1	-1	-1	-1	-1	1	-1	-1	1	-1	1	1	-1	1	1 -1 -1 1 1 1 -1	-1	1	1	1	-1	-1	1	1	-1	-1	1	-1	1	1	1	-1	-1	-1	1	-1	1];
 
 %% 1. Coarse frequency correction
 dc_offset_value = 10;
@@ -155,8 +157,8 @@ else
     %rx_vec = MF_output_downsample(1+length(preamble):end); % get the message
 %     raw_message_symbol = rx_vec;
 
-    %scatterplot(rx_vec);
-    %title('Downsampling');
+    % scatterplot(rx_vec);
+    % title('Downsampling');
 
 %% 5. Frequency and phase correction
 
@@ -227,8 +229,8 @@ else
     disp(['length of decoded message', num2str(length(received_message_bits))]);
     
     % Plot constellation diagram after Frequency and phase correction
-    %scatterplot(received_message_symbols);
-    %title('QAM Constellation Diagram after Frequency and phase correction');
+    % scatterplot(received_message_symbols);
+    % title('QAM Constellation Diagram after Frequency and phase correction');
 
 end
 end
